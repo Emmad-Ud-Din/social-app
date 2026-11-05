@@ -10,9 +10,10 @@ exercise at a time.
 | 1 | `users` | Data types, primary key, `NOT NULL`, `UNIQUE`, `DEFAULT`, NULL vs `''` | ✅ |
 | 2 | `posts` | Foreign keys, `ON DELETE`, `CHECK`, nesting functions, normalization | ✅ |
 | 3 | `likes` | Many-to-many, join tables, composite primary keys, cascade chains | ✅ |
-| 4 | `comments` | Putting it together: two foreign keys, `CHECK`, `ON DELETE` | in progress |
+| 4 | `comments` | Putting it together: two foreign keys, `CHECK`, `ON DELETE`, nullable foreign keys | ✅ |
+| 5 | `friendships` | Self-referencing tables, ENUM types, multi-column `CHECK` | in progress |
 
-Later: friendships, then a Node + Express API and authentication.
+Later: a Node + Express API and authentication.
 
 ## Set up the database
 
@@ -27,7 +28,9 @@ Handy psql commands: `\dt` list tables, `\d posts` describe a table, `\q` quit.
 
 ```
 users ──< posts
-users ──< likes >── posts
+users ──< likes    >── posts
+users ──< comments >── posts
 ```
-`likes` sits between `users` and `posts`: each row is one user liking one post.
+`likes` and `comments` sit between `users` and `posts`: each row is one user
+liking, or commenting on, one post.
 `─<` means "one to many": one user has many posts.
