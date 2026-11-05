@@ -20,6 +20,7 @@ Later: a Node + Express API and authentication.
 ```bash
 psql -U postgres -c "CREATE ROLE minifb LOGIN PASSWORD 'minifb'" -c "CREATE DATABASE minifb OWNER minifb"
 psql -U minifb -h localhost -d minifb -f db/schema.sql
+psql -U minifb -h localhost -d minifb -f db/seed.sql     # optional sample data
 ```
 
 Handy psql commands: `\dt` list tables, `\d posts` describe a table, `\q` quit.
