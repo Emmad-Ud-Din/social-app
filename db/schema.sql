@@ -18,3 +18,11 @@ id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 body     TEXT  NOT NULL CHECK (length(trim(body)) BETWEEN 10 AND 500),
 time_created TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Exercise 3: likes
+CREATE TABLE likes(
+user_id  BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+post_id BIGINT  NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+PRIMARY KEY (user_id, post_id),
+time_created TIMESTAMPTZ NOT NULL DEFAULT now()
+);
