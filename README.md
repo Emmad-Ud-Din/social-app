@@ -26,8 +26,9 @@ Handy psql commands: `\dt` list tables, `\d posts` describe a table, `\q` quit.
 ## Tables so far
 
 ```
-users ─┬─< posts ──< likes
-       └──────────────< likes
+users ──< posts
+  │         │
+  └──< likes >──┘
 ```
 `likes` sits between `users` and `posts`: each row is one user liking one post.
 `─<` means "one to many": one user has many posts.
