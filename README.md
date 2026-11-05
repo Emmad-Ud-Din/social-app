@@ -11,7 +11,7 @@ exercise at a time.
 | 2 | `posts` | Foreign keys, `ON DELETE`, `CHECK`, nesting functions, normalization | ✅ |
 | 3 | `likes` | Many-to-many, join tables, composite primary keys, cascade chains | ✅ |
 | 4 | `comments` | Putting it together: two foreign keys, `CHECK`, `ON DELETE`, nullable foreign keys | ✅ |
-| 5 | `friendships` | Self-referencing tables, ENUM types, multi-column `CHECK` | in progress |
+| 5 | `friendships` | Self-referencing tables, ENUM types, multi-column `CHECK`, unique index on expressions | ✅ |
 
 Later: a Node + Express API and authentication.
 
@@ -24,7 +24,7 @@ psql -U minifb -h localhost -d minifb -f db/schema.sql
 
 Handy psql commands: `\dt` list tables, `\d posts` describe a table, `\q` quit.
 
-## Tables so far
+## Tables
 
 ```
 users ──< posts
@@ -33,4 +33,10 @@ users ──< comments >── posts
 ```
 `likes` and `comments` sit between `users` and `posts`: each row is one user
 liking, or commenting on, one post.
+
+```
+users ──< friendships >── users
+```
+`friendships` links two users: `sender_id` sent the request, `receiver_id`
+received it, and `status` is `pending` or `accepted`.
 `─<` means "one to many": one user has many posts.

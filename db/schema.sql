@@ -35,3 +35,14 @@ post_id BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
 body TEXT NOT NULL CHECK (length(trim(body)) BETWEEN 10 AND 500),
 time_created TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Exercise 5: friendships
+CREATE TYPE friendship AS ENUM ('pending', 'accepted');
+CREATE TABLE friendships(
+sender_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+receiver_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+PRIMARY KEY (sender_id, receiver_id),
+status friendship NOT NULL DEFAULT 'pending',
+time_sent TIMESTAMPTZ NOT NULL DEFAULT now(),
+CHECK(sender_id<>receiver_id));
+CREATE UNIQUE INDEX request_order ON friendships ( least(sender_id, receiver_id), greatest(sender_id, receiver_id));
