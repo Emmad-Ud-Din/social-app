@@ -1,29 +1,30 @@
 # Social App (Mini Facebook)
 
-A learning project: a small social network backend on PostgreSQL.
+A learning project: a small social network backend on PostgreSQL, built one
+exercise at a time.
 
-| Lesson | What it covers | Files |
-|---|---|---|
-| 1. Data model | Tables, primary/foreign keys, constraints, indexes, joins, CTEs | `db/` |
-| 2. API (next) | Node + Express, connection pool, parameterized queries, REST | — |
-| 3. Auth (next) | Password hashing, sessions/JWT, authorization | — |
+## Progress
+
+| Exercise | Table | Concepts | Status |
+|---|---|---|---|
+| 1 | `users` | Data types, primary key, `NOT NULL`, `UNIQUE`, `DEFAULT`, NULL vs `''` | ✅ |
+| 2 | `posts` | Foreign keys, `ON DELETE`, `CHECK`, nesting functions, normalization | ✅ |
+| 3 | `likes` | Many-to-many, join tables, composite primary keys | in progress |
+
+Later: comments, friendships, then a Node + Express API and authentication.
 
 ## Set up the database
 
 ```bash
-sudo -u postgres psql -c "CREATE ROLE minifb LOGIN PASSWORD 'minifb'" -c "CREATE DATABASE minifb OWNER minifb"
+psql -U postgres -c "CREATE ROLE minifb LOGIN PASSWORD 'minifb'" -c "CREATE DATABASE minifb OWNER minifb"
 psql -U minifb -h localhost -d minifb -f db/schema.sql
-psql -U minifb -h localhost -d minifb -f db/seed.sql
-psql -U minifb -h localhost -d minifb      # open a shell, then try db/queries.sql
 ```
 
 Handy psql commands: `\dt` list tables, `\d posts` describe a table, `\q` quit.
 
-## Tables
+## Tables so far
 
 ```
-users ─┬─< posts ─┬─< comments >── users
-       │          └─< likes    >── users
-       └─< friendships >── users   (requester → addressee, pending/accepted)
+users ──< posts
 ```
-`─<` means "one to many".
+`──<` means "one to many": one user has many posts.
