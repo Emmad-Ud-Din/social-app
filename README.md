@@ -13,6 +13,13 @@ exercise at a time.
 | 4 | `comments` | Putting it together: two foreign keys, `CHECK`, `ON DELETE`, nullable foreign keys | ✅ |
 | 5 | `friendships` | Self-referencing tables, ENUM types, multi-column `CHECK`, unique index on expressions | ✅ |
 
+### Queries (`db/queries.sql`)
+
+| Exercise | Concepts | Status |
+|---|---|---|
+| 1 | `SELECT`, `WHERE`, `ORDER BY`, `LIMIT`, `IS NULL` vs `=` | ✅ |
+| 2 | `JOIN`, aliases, `AS`, joining the same table twice | in progress |
+
 Later: a Node + Express API and authentication.
 
 ## Set up the database
