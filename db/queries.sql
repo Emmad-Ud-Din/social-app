@@ -42,8 +42,8 @@ where c.post_id=1
 order by c.time_created ASC
 ;
 
--- 2c. Pending friend requests with both names (in progress)
-SELECT s.display_name AS sender, f.receiver_id
+-- 2c. Pending friend requests with both names
+SELECT s.display_name AS sender, r.display_name AS receiver
 FROM friendships f
 JOIN users s ON s.id = f.sender_id
 JOIN users r on r.id =f.receiver_id

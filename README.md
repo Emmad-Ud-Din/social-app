@@ -18,7 +18,8 @@ exercise at a time.
 | Exercise | Concepts | Status |
 |---|---|---|
 | 1 | `SELECT`, `WHERE`, `ORDER BY`, `LIMIT`, `IS NULL` vs `=` | ✅ |
-| 2 | `JOIN`, aliases, `AS`, joining the same table twice | in progress |
+| 2 | `JOIN`, aliases, `AS`, joining the same table twice | ✅ |
+| 3 | `count()`, `GROUP BY`, `LEFT JOIN` | in progress |
 
 Later: a Node + Express API and authentication.
 
