@@ -52,11 +52,10 @@ WHERE f.status = 'pending';
 -- Query Exercise 3: counting with GROUP BY
 
 -- 3a. How many posts each user has written, highest first
--- TODO: grouping by display_name merges different users who share a name
 select u.display_name, count(*) as posts_made
 from posts p
 join users u on u.id = p.user_id
-group by u.display_name
+group by u.id
 order by posts_made desc;
 
 -- 3b. Like count for every post (including 0), most-liked first
