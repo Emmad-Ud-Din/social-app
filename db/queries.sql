@@ -71,3 +71,13 @@ order by total_likes desc;
 select case when sender_id=1 then  receiver_id else sender_id end as friend_id
 from friendships
 where (sender_id = 1 or receiver_id =1) and status='accepted';
+
+-- 4b. Ann's news feed: her posts and her friends' posts, newest first
+select p.body, p.time_created, u.display_name
+from posts p
+join users u on u.id = p.user_id
+where p.user_id =1 
+or p.user_id in (select case when sender_id=1 then  receiver_id else sender_id end as friend_id
+from friendships
+where (sender_id = 1 or receiver_id =1) and status='accepted')
+order by p.time_created desc;
