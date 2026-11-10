@@ -20,9 +20,13 @@ app.get('/db-check', async (req,res)=>{
 });
 
 app.get('/feed', async (req,res)=>{
+    const userId = Number(req.query.user_id);
     if (!req.query.user_id) {
         return res.status(400).json({ error: 'user_id is required' });
     }
+    if(!(Number.isInteger(userId))||userId<1){
+        return res.status(400).json({error:"user_id must be a number"})
+  }
     const result = await pool.query (
         `select p.body, p.time_created, u.display_name, count (l.user_id)::int as likes, 
         (select count (*)::int from comments c where c.post_id=p.id) as comments
@@ -35,7 +39,7 @@ app.get('/feed', async (req,res)=>{
         where (sender_id = $1 or receiver_id =$1) and status='accepted')
         group by p.id, u.id
         order by p.time_created desc;
-        `, [req.query.user_id]
+        `, [userId]
     );
     res.json (result.rows);
 });
