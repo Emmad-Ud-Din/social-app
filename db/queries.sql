@@ -64,3 +64,10 @@ from posts p
 left join likes l on l.post_id=p.id
 group by p.id
 order by total_likes desc;
+
+-- Query Exercise 4: the news feed
+
+-- 4a. IDs of Ann's (user 1) accepted friends, whichever side of the request she was on
+select case when sender_id=1 then  receiver_id else sender_id end as friend_id
+from friendships
+where (sender_id = 1 or receiver_id =1) and status='accepted';
