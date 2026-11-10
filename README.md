@@ -20,7 +20,7 @@ exercise at a time.
 | 1 | `SELECT`, `WHERE`, `ORDER BY`, `LIMIT`, `IS NULL` vs `=` | ✅ |
 | 2 | `JOIN`, aliases, `AS`, joining the same table twice | ✅ |
 | 3 | `count()`, `GROUP BY`, `LEFT JOIN`, `count(*)` vs `count(column)` | ✅ |
-| 4 | The news feed: combining everything | in progress |
+| 4 | The news feed: `CASE`, `OR`, subqueries, correlated subqueries, join fan-out | ✅ |
 
 Later: a Node + Express API and authentication.
 
