@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express()
 const pool = require('./db')
+app.use(express.json());
 
 app.get('/hello', (req,res)=>{
 res.json ({message:' Hello from my API'});
@@ -43,3 +44,11 @@ app.get('/feed', async (req,res)=>{
     );
     res.json (result.rows);
 });
+
+app.post('/posts', async(req,res)=>{
+    const result=await pool.query(
+        'INSERT INTO posts (user_id,body) VALUES ($1,$2) RETURNING *',
+        [req.body.user_id, req.body.body]
+    );
+    res.status(201).json(result.rows[0]);
+})
