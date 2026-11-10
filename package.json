@@ -1,0 +1,20 @@
+{
+  "name": "social-app",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Emmad-Ud-Din/social-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Emmad-Ud-Din/social-app/issues"
+  },
+  "homepage": "https://github.com/Emmad-Ud-Din/social-app#readme",
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}
