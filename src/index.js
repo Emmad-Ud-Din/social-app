@@ -46,9 +46,18 @@ app.get('/feed', async (req,res)=>{
 });
 
 app.post('/posts', async(req,res)=>{
+    try{
     const result=await pool.query(
         'INSERT INTO posts (user_id,body) VALUES ($1,$2) RETURNING *',
         [req.body.user_id, req.body.body]
     );
-    res.status(201).json(result.rows[0]);
+    res.status(201).json(result.rows[0]);}
+    catch (err){
+         if (err.code === '23514') {
+      return res.status(400).json({error: "body must be between 10 and 500 characters"});
+    }
+    console.error(err);
+    res.status(500).json({error: "something went wrong" });
+  }
+    
 })
