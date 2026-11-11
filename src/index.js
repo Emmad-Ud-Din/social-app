@@ -64,3 +64,30 @@ app.post('/posts', async(req,res)=>{
   }
     
 })
+
+app.post('/posts/:id/likes', async (req,res)=>{
+const postId = Number(req.params.id);
+
+if(!Number.isInteger(postId)|| postId<1){
+    return res.status(400).json({error: "post id must be a number"});
+}
+
+try{
+const result= await pool.query(
+    'INSERT INTO likes (user_id, post_id) VALUES ($1, $2) RETURNING * ',
+    [req.body.user_id, postId]
+);
+
+res.status(201).json(result.rows[0]);}
+catch (err){
+if (err.code==='23505'){
+    return res.status(409).json({error: 'already liked'});
+}
+if(err.code==='23503'){
+    return res.status(404).json({error:"post or user not found"});
+}
+console.error(err);
+res.status(500).json({error: "Something went wrong"});
+}
+
+});
