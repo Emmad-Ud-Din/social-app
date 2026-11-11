@@ -118,3 +118,33 @@ app.delete('/posts/:id/likes', async (req,res)=>{
         res.status(500).json({error: "Something went wrong"});
     }
 });
+
+app.post('/posts/:id/comments', async (req,res)=>{
+    const postId=Number(req.params.id);
+    if (!Number.isInteger(postId)||postId<1){
+        return res.status(400).json({error:"post id must be a number"})
+    }
+
+    try{
+        const result = await pool.query(
+            "INSERT INTO comments (post_id,user_id, body) VALUES ($1, $2, $3) RETURNING *",
+            [postId,req.body.user_id, req.body.body]
+        );
+        res.status(201).json(result.rows[0]);
+    }
+    catch(err){
+        if (err.code==="23514"){
+            return res.status(400).json({error:"comment must be between 10 and 500 characters"});
+        }
+
+        if(err.code==="23503"){
+            return res.status(404).json({error:"the post or user does not exist"})
+        }
+
+        if(err.code==="22P02"){
+            return res.status(400).json({error:"Invalid user id"})
+        }
+        console.error(err);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
