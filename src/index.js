@@ -91,3 +91,30 @@ res.status(500).json({error: "Something went wrong"});
 }
 
 });
+
+app.delete('/posts/:id/likes', async (req,res)=>{
+    const postId= Number(req.params.id)
+
+    if(!Number.isInteger(postId)||postId<1){
+        return res.status(400).json({error:"post id must be a number"})
+    }
+
+    try{
+        const result= await pool.query(
+            "DELETE FROM likes WHERE user_id = $1 and post_id= $2 ",
+            [req.body.user_id,postId]
+        );
+
+        if (result.rowCount === 0) {
+        return res.status(404).json({ error: 'Post was never liked' });
+        }
+        res.status(204).end(); 
+    }  
+    catch(err){
+        if (err.code === '22P02') {
+            return res.status(400).json({ error: 'user_id must be a number' });
+    }
+        console.error(err);
+        res.status(500).json({error: "Something went wrong"});
+    }
+});
