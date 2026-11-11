@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express()
 const pool = require('./db')
+const bcrypt = require('bcryptjs');
 app.use(express.json());
 
 app.get('/hello', (req,res)=>{
@@ -217,3 +218,32 @@ app.patch('/users/:id/friendships/:senderId', async(req,res)=>{
     }
 
 })
+
+app.post("/signup", async(req,res)=>{
+    const {email, display_name,password}=req.body;
+    if (!email || !display_name|| !password) {
+        return res.status(400).json({ error: 'email, display_name and password are required' });
+    }
+        if (password.length < 8) {
+        return res.status(400).json({ error: 'password must be at least 8 characters' });
+    }
+
+        try {
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        const result = await pool.query(
+            `INSERT INTO users (email, display_name, password_hash)
+             VALUES ($1, $2, $3)
+             RETURNING id, email, display_name, date_created`,
+            [email, display_name, passwordHash]
+        );
+        res.status(201).json(result.rows[0]);
+
+        } catch (err) {
+        if (err.code === '23505') {
+            return res.status(409).json({ error: 'email already registered' });
+        }
+        console.error(err);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
