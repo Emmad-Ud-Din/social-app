@@ -183,3 +183,37 @@ app.post('/users/:id/friendships', async(req,res)=>{
         res.status(500).json({ error: 'Something went wrong'});
     }
 })
+
+app.patch('/users/:id/friendships/:senderId', async(req,res)=>{
+    const receiverId=Number(req.params.id);
+    const senderId=Number(req.params.senderId);
+
+    if(!Number.isInteger(receiverId)||receiverId<1||!Number.isInteger(senderId)||senderId<1){
+        return res.status(400).json({error:"User IDs must be valid numbers"});
+    }
+
+    if(req.body.status!== 'accepted'){
+        return res.status(400).json({error:"status must be 'accepted'"});
+    }
+
+    try{
+        const result=await pool.query(
+            `UPDATE friendships
+            SET status = 'accepted'
+            WHERE sender_id=$1 AND receiver_id=$2 AND status='pending'
+            RETURNING *
+            `,
+            [senderId,receiverId]
+        );
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'no pending friend request from this user' });
+        }
+        
+        res.status(200).json(result.rows[0]);
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+
+})
