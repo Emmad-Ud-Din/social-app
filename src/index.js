@@ -56,6 +56,9 @@ app.post('/posts', async(req,res)=>{
          if (err.code === '23514') {
       return res.status(400).json({error: "body must be between 10 and 500 characters"});
     }
+    if (err.code==='23503'){
+        return res.status(400).json({error: "User does not exist"})
+    }
     console.error(err);
     res.status(500).json({error: "something went wrong" });
   }
