@@ -148,3 +148,38 @@ app.post('/posts/:id/comments', async (req,res)=>{
         res.status(500).json({ error: 'Something went wrong' });
     }
 });
+
+app.post('/users/:id/friendships', async(req,res)=>{
+    const userId=Number(req.params.id);
+    if(!Number.isInteger(userId)||userId<1){
+        return res.status(400).json({error:"user id must be a valid number"});
+    }
+
+    try{
+        const result=await pool.query(
+            "INSERT INTO friendships (sender_id, receiver_id) VALUES ($1, $2) RETURNING *",
+            [userId, req.body.receiver_id]
+        );
+        res.status(201).json(result.rows[0]);
+    }
+
+    catch(err){
+        if(err.code === "23514"){
+            return res.status(400).json({error: "You cannot friend request yourself"});
+        }
+        if(err.code==="23505"){
+            return res.status(409).json({error:"Friend request already exists"});
+        }
+        if(err.code==="23503"){
+            return res.status(404).json({error:"User not found"});
+        }
+        if(err.code==="23502"){
+            return res.status(400).json({error:"Receiver id is required"});
+        }
+        if(err.code==="22P02"){
+            return res.status(400).json({error:"Receiver id must be a valid number"});
+        }
+        console.error(err);
+        res.status(500).json({ error: 'Something went wrong'});
+    }
+})
