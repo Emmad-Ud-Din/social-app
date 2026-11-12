@@ -5,6 +5,22 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 app.use(express.json());
 
+function requireAuth(req,res,next){
+    const header=req.headers.authorization;
+    if(!header||!header.startsWith('Bearer ')){
+        return res.status(401).json({error:"login required"});
+    }
+    const token= header.slice(7);
+    try{
+        const data=jwt.verify(token,process.env.JWT_SECRET);
+        req.userId=data.userId;
+        next();
+    }
+    catch(err){
+        return res.status(401).json({error:"invalid or expired token"});
+    }
+}
+
 app.get('/hello', (req,res)=>{
 res.json ({message:' Hello from my API'});
 });
@@ -47,11 +63,11 @@ app.get('/feed', async (req,res)=>{
     res.json (result.rows);
 });
 
-app.post('/posts', async(req,res)=>{
+app.post('/posts',requireAuth, async(req,res)=>{
     try{
     const result=await pool.query(
         'INSERT INTO posts (user_id,body) VALUES ($1,$2) RETURNING *',
-        [req.body.user_id, req.body.body]
+        [req.userId, req.body.body]
     );
     res.status(201).json(result.rows[0]);}
     catch (err){
