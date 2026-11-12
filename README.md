@@ -9,8 +9,13 @@ db/
   seed.sql       sample data (Ann, Ben, Cara, Dev, Eve)
   queries.sql    practice queries, up to the news feed
 src/
-  index.js       the Express API and its routes
-  db.js          the Postgres connection pool
+  index.js                 creates the app, mounts the routers, starts the server
+  db.js                    the Postgres connection pool
+  middleware/auth.js       requireAuth: checks the login token
+  routes/auth.js           /signup, /login
+  routes/posts.js          /posts, /posts/:id, likes, comments
+  routes/feed.js           /feed
+  routes/friendships.js    /friendships
 .env.example     template for .env (never commit .env)
 ```
 
@@ -161,3 +166,4 @@ users ──< friendships >── users
 | 6 | `UPDATE`, `PATCH`, mass assignment, full CRUD | ✅ |
 | 7 | Authentication: bcrypt password hashing, JWT login tokens, auth middleware, 401 vs 400 | ✅ |
 | 8 | Authorization: owner-only delete, 401 vs 403, `ON DELETE CASCADE` | ✅ |
+| 9 | Organising code: `express.Router()`, mounting, `require` paths, middleware order | ✅ |
