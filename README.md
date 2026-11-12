@@ -27,11 +27,16 @@ psql -U minifb -h localhost -d minifb -f db/seed.sql     # optional sample data
 ```
 
 **2. Configure the API:** copy `.env.example` to `.env` and fill in your own
-connection details:
+values:
 
 ```
 DATABASE_URL=postgres://USER:PASSWORD@localhost:5432/DATABASE
+JWT_SECRET=any-long-random-string
 ```
+
+`JWT_SECRET` signs login tokens; anyone who knows it can log in as any user,
+so keep it out of the code and out of Git. Restart the server after changing
+`.env`.
 
 **3. Install and run:**
 
@@ -46,37 +51,63 @@ Handy psql commands: `\dt` list tables, `\d posts` describe a table, `\q` quit.
 
 ## API
 
+### Accounts
+
 | Method | Route | Body | Success | Errors |
 |---|---|---|---|---|
-| GET | `/health` | | 200 `{"status":"ok"}` | |
-| GET | `/db-check` | | 200 `{"posts":7}` | |
-| GET | `/feed?user_id=1` | | 200, the user's and their friends' posts, newest first, with like and comment counts | 400 missing or invalid `user_id` |
-| POST | `/posts` | `{ "user_id", "body" }` | 201, the new post | 400 body not 10–500 characters, 400 user does not exist |
-| POST | `/posts/:id/likes` | `{ "user_id" }` | 201, the new like | 400 invalid post id, 404 post or user not found, 409 already liked |
-| DELETE | `/posts/:id/likes` | `{ "user_id" }` | 204, no body | 400 invalid post id or user id, 404 post was never liked |
-| POST | `/posts/:id/comments` | `{ "user_id", "body" }` | 201, the new comment | 400 invalid ids or body length, 404 post or user not found |
-| POST | `/users/:id/friendships` | `{ "receiver_id" }` | 201, a `pending` request from user `:id` | 400 to yourself, missing or invalid id; 404 user not found; 409 request already exists (either direction) |
-| PATCH | `/users/:id/friendships/:senderId` | `{ "status": "accepted" }` | 200, the accepted request (only the receiver `:id` can accept) | 400 invalid ids or status, 404 no pending request |
+| POST | `/signup` | `{ "email", "display_name", "password" }` | 201, the new user (never the password hash) | 400 missing field or password under 8 characters, 409 email already registered |
+| POST | `/login` | `{ "email", "password" }` | 200 `{ "token": "..." }`, valid for 1 hour | 400 missing field, 401 invalid email or password |
+
+Passwords are hashed with bcrypt before they are stored. The token is a JWT
+signed with `JWT_SECRET`; its payload is `{ "userId": ... }`.
+
+### Logged-in routes
+
+These need the header `Authorization: Bearer <token>`. Without it they return
+401 `login required`, and with a bad or expired token 401
+`invalid or expired token`. **The user is always taken from the token**: any
+`user_id` sent in the body is ignored.
+
+| Method | Route | Body | Success | Errors |
+|---|---|---|---|---|
+| GET | `/feed` | | 200, your posts and your friends' posts, newest first, with like and comment counts | |
+| POST | `/posts` | `{ "body" }` | 201, the new post | 400 body not 10–500 characters |
+| POST | `/posts/:id/likes` | | 201, the new like | 400 invalid post id, 404 post not found, 409 already liked |
+| DELETE | `/posts/:id/likes` | | 204, no body | 400 invalid post id, 404 post was never liked |
+| POST | `/posts/:id/comments` | `{ "body" }` | 201, the new comment | 400 invalid post id or body length, 404 post not found |
+| POST | `/friendships` | `{ "receiver_id" }` | 201, a `pending` request from you | 400 to yourself, missing or invalid id; 404 user not found; 409 request already exists (either direction) |
+| PATCH | `/friendships/:senderId` | `{ "status": "accepted" }` | 200, the accepted request (only the receiver can accept) | 400 invalid id or status, 404 no pending request from that user |
+
+### Other
+
+| Method | Route | Success |
+|---|---|---|
+| GET | `/health` | 200 `{"status":"ok"}` |
+| GET | `/db-check` | 200 `{"posts":7}` |
 
 Unexpected errors return 500 `{"error":"Something went wrong"}` and are logged
 on the server; error details are never sent to the client.
 
-**Not yet secure:** every route trusts the user id the client sends.
-Authentication (next lesson) will replace that with login tokens.
+### Trying it with curl (PowerShell)
 
-### Trying it with curl
+Sign up, then log in and keep the token in a variable:
 
-Put the request body in a file, e.g. `test-post.json`:
-
-```json
-{ "user_id": 1, "body": "My first post from the API!" }
+```powershell
+curl.exe -X POST http://localhost:3000/signup -H "Content-Type: application/json" --data "@test-signup.json"
+$token = (curl.exe -s -X POST http://localhost:3000/login -H "Content-Type: application/json" --data "@test-login.json" | ConvertFrom-Json).token
 ```
 
-```bash
-curl.exe -i -X POST http://localhost:3000/posts -H "Content-Type: application/json" --data "@test-post.json"
+`test-signup.json` and `test-login.json` hold the request bodies, e.g.
+`{ "email": "fay@mail.com", "password": "correct horse battery" }`.
+Then call a logged-in route:
+
+```powershell
+curl.exe -i http://localhost:3000/feed -H "Authorization: Bearer $token"
 ```
 
-On macOS or Linux use `curl` instead of `curl.exe`.
+On macOS or Linux use `curl` and `TOKEN=$(...)`. The sample users in
+`db/seed.sql` have placeholder password hashes and cannot log in; create your
+own with `/signup`.
 
 ## Tables
 
@@ -127,4 +158,4 @@ users ──< friendships >── users
 | 4 | `POST`, `req.body`, middleware, `INSERT ... RETURNING`, `try`/`catch`, Postgres error codes | ✅ |
 | 5 | Route parameters, `DELETE`, `rowCount`, 204/404/409 | ✅ |
 | 6 | `UPDATE`, `PATCH`, mass assignment, full CRUD | ✅ |
-| 7 | Authentication: password hashing, login tokens, protected routes | next |
+| 7 | Authentication: bcrypt password hashing, JWT login tokens, auth middleware, 401 vs 400 | ✅ |
