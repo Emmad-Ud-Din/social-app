@@ -289,3 +289,35 @@ app.post("/login", async (req, res) => {
 
 
 })
+
+app.delete("/posts/:id",requireAuth,async (req,res)=>{
+    const postId=Number(req.params.id);
+
+    if (!Number.isInteger(postId) || postId < 1) {
+        return res.status(400).json({ error: 'post id must be a number' });
+    }
+
+    try{
+        const found= await pool.query(
+            `SELECT user_id FROM posts WHERE id = $1`,
+            [postId]
+        );
+        const post = found.rows[0]
+
+        if(!post){
+            return res.status(404).json({error:"Post not found"})
+        }
+
+        if(post.user_id !== req.userId){
+            return res.status(403).json({error:"you can only delete your own post"});
+        }
+
+        await pool.query('DELETE FROM posts WHERE id=$1',[postId]);
+        res.status(204).end();
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).json({error:"Something went wrong"});
+
+    }
+});

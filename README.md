@@ -72,6 +72,7 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 |---|---|---|---|---|
 | GET | `/feed` | | 200, your posts and your friends' posts, newest first, with like and comment counts | |
 | POST | `/posts` | `{ "body" }` | 201, the new post | 400 body not 10–500 characters |
+| DELETE | `/posts/:id` | | 204, no body; the post's likes and comments are removed too | 400 invalid post id, 403 not your post, 404 post not found |
 | POST | `/posts/:id/likes` | | 201, the new like | 400 invalid post id, 404 post not found, 409 already liked |
 | DELETE | `/posts/:id/likes` | | 204, no body | 400 invalid post id, 404 post was never liked |
 | POST | `/posts/:id/comments` | `{ "body" }` | 201, the new comment | 400 invalid post id or body length, 404 post not found |
@@ -159,3 +160,4 @@ users ──< friendships >── users
 | 5 | Route parameters, `DELETE`, `rowCount`, 204/404/409 | ✅ |
 | 6 | `UPDATE`, `PATCH`, mass assignment, full CRUD | ✅ |
 | 7 | Authentication: bcrypt password hashing, JWT login tokens, auth middleware, 401 vs 400 | ✅ |
+| 8 | Authorization: owner-only delete, 401 vs 403, `ON DELETE CASCADE` | ✅ |
