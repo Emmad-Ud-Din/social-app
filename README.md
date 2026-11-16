@@ -9,14 +9,19 @@ db/
   seed.sql       sample data (Ann, Ben, Cara, Dev, Eve)
   queries.sql    practice queries, up to the news feed
 src/
-  index.js                 creates the app, mounts the routers, starts the server
+  index.js                 starts the server
+  app.js                   creates the app and mounts the routers (used by the tests)
   db.js                    the Postgres connection pool
   middleware/auth.js       requireAuth: checks the login token
   routes/auth.js           /signup, /login
   routes/posts.js          /posts, /posts/:id, likes, comments
   routes/feed.js           /feed
   routes/friendships.js    /friendships
+tests/
+  helpers.js               resets the test database
+  auth.test.js             sign-up, login and token tests
 .env.example     template for .env (never commit .env)
+.env.test.example template for .env.test, used by npm test
 ```
 
 ## Setup
@@ -51,6 +56,16 @@ npm run dev        # restarts on every save; use npm start for a plain run
 ```
 
 The API listens on http://localhost:3000.
+
+**4. Run the automated tests** (optional): create a separate, empty test
+database, copy `.env.test.example` to `.env.test` pointing at it, then:
+
+```bash
+npm test
+```
+
+The tests delete and recreate every table in the test database on each run, so
+never point `.env.test` at your real database.
 
 Handy psql commands: `\dt` list tables, `\d posts` describe a table, `\q` quit.
 
@@ -167,3 +182,4 @@ users ──< friendships >── users
 | 7 | Authentication: bcrypt password hashing, JWT login tokens, auth middleware, 401 vs 400 | ✅ |
 | 8 | Authorization: owner-only delete, 401 vs 403, `ON DELETE CASCADE` | ✅ |
 | 9 | Organising code: `express.Router()`, mounting, `require` paths, middleware order | ✅ |
+| 10 | Automated tests: `node:test`, `supertest`, a separate test database | in progress |
