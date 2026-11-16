@@ -20,6 +20,7 @@ src/
 tests/
   helpers.js               resets the test database
   auth.test.js             sign-up, login and token tests
+  posts.test.js            posting, likes and owner-only delete, as logged-in users
 .env.example     template for .env (never commit .env)
 .env.test.example template for .env.test, used by npm test
 ```
@@ -182,4 +183,5 @@ users ──< friendships >── users
 | 7 | Authentication: bcrypt password hashing, JWT login tokens, auth middleware, 401 vs 400 | ✅ |
 | 8 | Authorization: owner-only delete, 401 vs 403, `ON DELETE CASCADE` | ✅ |
 | 9 | Organising code: `express.Router()`, mounting, `require` paths, middleware order | ✅ |
-| 10 | Automated tests: `node:test`, `supertest`, a separate test database | in progress |
+| 10 | Automated tests: `node:test`, `supertest`, a separate test database, testing logged-in routes | ✅ |
+| 11 | Pagination: `LIMIT`, cursors, indexes, `EXPLAIN` | next |
