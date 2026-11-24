@@ -31,6 +31,7 @@ tests/
   posts.test.js            posting, likes and owner-only delete, as logged-in users
   feed.test.js             feed pagination: pages, cursors, friends only, bad input
   errors.test.js           error handling and login rate limiting
+  friendships.test.js      the pending friend requests list
 .github/workflows/test.yml  runs npm test on GitHub for every push
 .env.example     template for .env (never commit .env)
 .env.test.example template for .env.test, used by npm test
@@ -95,13 +96,13 @@ http://localhost:3000 in a browser. From there you can:
 - write posts (with a 10–500 character counter)
 - read your feed 10 posts at a time, with a "Load more" button
 - like and unlike, comment on, and delete posts
-- send a friend request to a user number, and accept a request from one
+- send a friend request to a user number, and see the requests sent to you,
+  each with an Accept button
 
 The page uses exactly the same API routes as curl or the tests do, with the
 `Authorization: Bearer <token>` header, and shows the API's error messages.
-Because the feed doesn't say who wrote a post or whether you already liked
-it, every post has a Delete button (the API answers 403 if it isn't yours)
-and a Like button that turns into Unlike if the API says you already liked it.
+Delete only appears on your own posts (the feed's `author_id`), and Like turns
+into Unlike on posts you already liked (`liked_by_me`).
 
 ## API
 
@@ -131,6 +132,7 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 | DELETE | `/posts/:id/likes` | | 204, no body | 400 invalid post id, 404 post was never liked |
 | POST | `/posts/:id/comments` | `{ "body" }` | 201, the new comment | 400 invalid post id or body length, 404 post not found |
 | POST | `/friendships` | `{ "receiver_id" }` | 201, a `pending` request from you | 400 to yourself, missing or invalid id; 404 user not found; 409 request already exists (either direction) |
+| GET | `/friendships/pending` | | 200 `{ requests }`: requests other users sent you that are still pending, newest first. Each has `sender_id`, `display_name` and `time_sent`. Requests you sent are not included | |
 | PATCH | `/friendships/:senderId` | `{ "status": "accepted" }` | 200, the accepted request (only the receiver can accept) | 400 invalid id or status, 404 no pending request from that user |
 
 ### Other
@@ -222,3 +224,4 @@ users ──< friendships >── users
 | 11 | Pagination and performance: cursor pagination, row comparison, indexes, `EXPLAIN ANALYZE`, `WITH` (limit first, count after), indexing foreign keys | ✅ |
 | 12 | Evolving an API: adding fields without breaking clients, `EXISTS`, using the new fields in the front end | ✅ |
 | 13 | Central error handling, login rate limiting (429), continuous integration with GitHub Actions | ✅ |
+| 14 | Feature: pending friend requests (`GET /friendships/pending`), only requests sent *to* the logged-in user | ✅ |

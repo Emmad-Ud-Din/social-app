@@ -181,6 +181,10 @@ function acceptFriendRequest(senderId) {
     return api('PATCH', '/friendships/' + senderId, { status: 'accepted' });
 }
 
+function getPendingRequests() {
+    return api('GET', '/friendships/pending');
+}
+
 
 // =====================================================================
 // 4. Showing things on the page
@@ -229,6 +233,44 @@ function showScreen() {
     $('app-screen').hidden = false;
     $('user-bar').hidden = false;
     loadFeed(true);
+    loadPendingRequests();
+}
+
+// Shows the friend requests waiting for you, each with an Accept button.
+async function loadPendingRequests() {
+    const list = $('pending-list');
+    let data;
+    try {
+        data = await getPendingRequests();
+    } catch (err) {
+        pageMessage(err.message, true);
+        return;
+    }
+    list.replaceChildren();
+    $('pending-empty').hidden = data.requests.length > 0;
+    for (const request of data.requests) {
+        const item = document.createElement('li');
+        const who = document.createElement('span');
+        // textContent, never innerHTML: a display name is text typed by a user.
+        who.textContent = request.display_name + ' (user #' + request.sender_id + ')';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = 'Accept';
+        button.addEventListener('click', () => acceptAndRefresh(request.sender_id));
+        item.append(who, button);
+        list.append(item);
+    }
+}
+
+async function acceptAndRefresh(senderId) {
+    try {
+        await acceptFriendRequest(senderId);
+        pageMessage('You are now friends with user #' + senderId + '.', false);
+        loadPendingRequests();
+        loadFeed(true);  // their posts are in your feed now
+    } catch (err) {
+        pageMessage(err.message, true);
+    }
 }
 
 function logOut(message) {
@@ -473,20 +515,6 @@ $('friend-request-form').addEventListener('submit', async (event) => {
         await sendFriendRequest(receiverId);
         pageMessage('Friend request sent to user #' + receiverId + '.', false);
         form.reset();
-    } catch (err) {
-        pageMessage(err.message, true);
-    }
-});
-
-$('friend-accept-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const form = event.target;
-    const senderId = Number(form.elements.sender_id.value);
-    try {
-        await acceptFriendRequest(senderId);
-        pageMessage('You are now friends with user #' + senderId + '.', false);
-        form.reset();
-        loadFeed(true);  // their posts are in your feed now
     } catch (err) {
         pageMessage(err.message, true);
     }

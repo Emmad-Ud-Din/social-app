@@ -66,12 +66,9 @@
                     </label>
                     <button type="submit">Send request</button>
                 </form>
-                <form id="friend-accept-form" class="inline-form">
-                    <label>Accept request from user #
-                        <input type="number" name="sender_id" min="1" required>
-                    </label>
-                    <button type="submit">Accept</button>
-                </form>
+                <h3>Requests sent to you</h3>
+                <p id="pending-empty" class="hint">No pending requests.</p>
+                <ul id="pending-list" class="pending-list"></ul>
             </div>
 
             <h2 class="feed-title">Your feed</h2>

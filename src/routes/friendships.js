@@ -68,4 +68,18 @@ router.patch('/:senderId', async (req, res) => {
 
 });
 
+// GET /friendships/pending: requests other people sent to me that I haven't accepted yet
+router.get('/pending', async (req, res) => {
+    const result = await pool.query(
+        `select f.sender_id, u.display_name, f.time_sent
+        from friendships f
+        join users u on u.id = f.sender_id
+        where f.receiver_id = $1
+        and f.status = 'pending'
+        order by f.time_sent desc`,
+        [req.userId]
+    );
+    res.json({ requests: result.rows });
+});
+
 module.exports=router;

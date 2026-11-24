@@ -277,3 +277,23 @@ button.wide {
         max-width: 720px;
     }
 }
+
+.pending-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 12px;
+}
+
+.pending-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #e4e6eb;
+}
+
+h3 {
+    font-size: 1rem;
+    margin: 16px 0 4px;
+}
