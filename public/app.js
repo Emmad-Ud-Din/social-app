@@ -258,17 +258,17 @@ function plural(count, word) {
 }
 
 // Builds the <li> for one post from the <template> in index.html.
-// post = { id, body, time_created, display_name, likes, comments }
+// post = { id, author_id, body, time_created, display_name, likes, comments, liked_by_me }
 function renderPost(post) {
+    const me = readTokenPayload(getToken());
     const li = $('post-template').content.firstElementChild.cloneNode(true);
     li.dataset.postId = post.id;
 
     // Counts we update as the user likes and comments.
     let likes = post.likes;
     let comments = post.comments;
-    // The feed doesn't tell us if we liked a post already, so we start with
-    // "not liked" and find out from the API's 409 if we try to like it again.
-    let liked = false;
+    // The feed tells us whether we already liked this post.
+    let liked = post.liked_by_me === true;
 
     const likesEl = li.querySelector('.post-likes');
     const commentsEl = li.querySelector('.post-comments');
@@ -327,8 +327,12 @@ function renderPost(post) {
         updateLikeButton();
     });
 
-    // Delete
-    li.querySelector('.delete-button').addEventListener('click', async () => {
+    // Delete: only shown on your own posts. The API still checks (403) either way.
+    const deleteButton = li.querySelector('.delete-button');
+    if (me && post.author_id !== undefined && post.author_id !== me.userId) {
+        deleteButton.remove();
+    }
+    deleteButton.addEventListener('click', async () => {
         hideMessage(messageEl);
         if (!confirm('Delete this post?')) {
             return;

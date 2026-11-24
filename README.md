@@ -118,7 +118,7 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 
 | Method | Route | Body | Success | Errors |
 |---|---|---|---|---|
-| GET | `/feed` | | 200, your posts and your friends' posts, newest first, with like and comment counts | |
+| GET | `/feed?limit=&cursor=` | | 200 `{ posts, nextCursor }`: your posts and your friends' posts, newest first. Each post has `id`, `author_id`, `body`, `time_created`, `display_name`, `likes`, `comments` and `liked_by_me`. Pass `nextCursor` back as `cursor` for the next page; it is `null` on the last page. `limit` defaults to 20, max 50 | 400 invalid `limit` or `cursor` |
 | POST | `/posts` | `{ "body" }` | 201, the new post | 400 body not 10–500 characters |
 | DELETE | `/posts/:id` | | 204, no body; the post's likes and comments are removed too | 400 invalid post id, 403 not your post, 404 post not found |
 | POST | `/posts/:id/likes` | | 201, the new like | 400 invalid post id, 404 post not found, 409 already liked |
@@ -212,3 +212,4 @@ users ──< friendships >── users
 | 9 | Organising code: `express.Router()`, mounting, `require` paths, middleware order | ✅ |
 | 10 | Automated tests: `node:test`, `supertest`, a separate test database, testing logged-in routes | ✅ |
 | 11 | Pagination and performance: cursor pagination, row comparison, indexes, `EXPLAIN ANALYZE`, `WITH` (limit first, count after), indexing foreign keys | ✅ |
+| 12 | Evolving an API: adding fields without breaking clients, `EXISTS`, using the new fields in the front end | ✅ |

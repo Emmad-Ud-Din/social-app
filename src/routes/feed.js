@@ -32,9 +32,10 @@ router.get('/', async (req, res) => {
             order by p.time_created desc, p.id desc
             limit $3
         )
-        select page.id, page.body, page.time_created, u.display_name,
+        select page.id, page.user_id as author_id, page.body, page.time_created, u.display_name,
                (select count(*)::int from likes l where l.post_id = page.id) as likes,
-               (select count(*)::int from comments c where c.post_id = page.id) as comments
+               (select count(*)::int from comments c where c.post_id = page.id) as comments,
+               exists (select 1 from likes l where l.post_id = page.id and l.user_id = $1) as liked_by_me
         from page
         join users u on u.id = page.user_id
         order by page.time_created desc, page.id desc;

@@ -118,3 +118,51 @@ test('a cursor that is not a number is error 400', async () => {
     assert.strictEqual(res.status, 400);
     assert.strictEqual(res.body.error, 'cursor must be a valid post id');
 })
+
+test("posts include the author's id", async () => {
+    const res = await request(app)
+        .get('/feed')
+        .set('Authorization', `Bearer ${gus.token}`);
+
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.posts.length, 5);
+    assert.strictEqual(res.body.posts.every(post => post.author_id === fay.id), true);
+})
+
+test('liked_by_me is false before liking', async () => {
+    const res = await request(app)
+        .get('/feed')
+        .set('Authorization', `Bearer ${gus.token}`);
+
+    assert.strictEqual(res.body.posts[0].liked_by_me, false);
+})
+
+test('liked_by_me is true after liking', async () => {
+    const first = await request(app)
+        .get('/feed')
+        .set('Authorization', `Bearer ${gus.token}`);
+    const postId = first.body.posts[0].id;
+
+    const like = await request(app)
+        .post(`/posts/${postId}/likes`)
+        .set('Authorization', `Bearer ${gus.token}`);
+    assert.strictEqual(like.status, 201);
+
+    const res = await request(app)
+        .get('/feed')
+        .set('Authorization', `Bearer ${gus.token}`);
+    const post = res.body.posts.find(p => p.id === postId);
+
+    assert.strictEqual(post.liked_by_me, true);
+    assert.strictEqual(post.likes, 1);
+})
+
+test('liked_by_me is per user', async () => {
+    // Gus liked Fay's newest post in the previous test; Fay herself has not
+    const res = await request(app)
+        .get('/feed')
+        .set('Authorization', `Bearer ${fay.token}`);
+
+    assert.strictEqual(res.body.posts[0].likes, 1);
+    assert.strictEqual(res.body.posts[0].liked_by_me, false);
+})
