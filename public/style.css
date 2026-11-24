@@ -1,0 +1,279 @@
+/* Simple, readable styles. No framework: just plain CSS. */
+
+:root {
+    --bg: #f0f2f5;
+    --card: #ffffff;
+    --text: #1c1e21;
+    --muted: #65676b;
+    --border: #dddfe2;
+    --primary: #1877f2;
+    --primary-dark: #145dbf;
+    --danger: #d93025;
+    --ok-bg: #e7f6ea;
+    --ok-text: #1e6b30;
+    --error-bg: #fdecea;
+    --error-text: #a3221a;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--text);
+    background: var(--bg);
+}
+
+/* ----- Top bar ----- */
+.topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--primary);
+    color: #fff;
+}
+
+.topbar h1 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+#user-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ----- Page layout: one centred column ----- */
+main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+h2 {
+    margin: 0 0 10px;
+    font-size: 1.1rem;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+
+.hint {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 0 0 10px;
+}
+
+/* ----- Forms ----- */
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+input,
+textarea {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    padding: 8px 10px;
+    font: inherit;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+textarea {
+    resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: -1px;
+}
+
+button {
+    padding: 8px 14px;
+    font: inherit;
+    font-weight: 600;
+    color: #fff;
+    background: var(--primary);
+    border: 1px solid var(--primary);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--primary-dark);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button.secondary {
+    color: var(--text);
+    background: #e4e6eb;
+    border-color: #e4e6eb;
+}
+
+button.secondary:hover {
+    background: #d8dadf;
+}
+
+.topbar button.secondary {
+    background: #fff;
+}
+
+button.danger {
+    color: var(--danger);
+    background: transparent;
+    border-color: var(--danger);
+}
+
+button.danger:hover {
+    background: var(--error-bg);
+}
+
+button.liked {
+    color: #fff;
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+button.wide {
+    width: 100%;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.counter {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.counter.bad {
+    color: var(--danger);
+}
+
+/* Label + input + button on one line (wraps on small screens) */
+.inline-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.inline-form label {
+    flex: 1 1 220px;
+    margin: 0;
+}
+
+/* ----- Messages ----- */
+.message {
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin: 0 0 14px;
+    background: var(--ok-bg);
+    color: var(--ok-text);
+}
+
+.message.error {
+    background: var(--error-bg);
+    color: var(--error-text);
+}
+
+/* ----- Feed ----- */
+.feed-title {
+    margin-top: 22px;
+}
+
+.feed {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.post-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.post-time {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.post-body {
+    margin: 8px 0;
+    white-space: pre-wrap;      /* keep the line breaks the author typed */
+    overflow-wrap: anywhere;    /* long words or links don't break the layout */
+}
+
+.post-stats {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+
+.post-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.comment-form {
+    display: flex;
+    gap: 8px;
+}
+
+.comment-form input {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.post .message {
+    margin: 8px 0 0;
+}
+
+/* ----- Wider screens: sign-up and log-in side by side ----- */
+@media (min-width: 700px) {
+    #auth-screen {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        align-items: start;
+    }
+    main {
+        max-width: 720px;
+    }
+}

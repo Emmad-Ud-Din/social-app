@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Social App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>Social App</h1>
+        <!-- Shown only when logged in (app.js removes the "hidden" attribute) -->
+        <div id="user-bar" hidden>
+            <span id="who-am-i"></span>
+            <button id="logout-button" type="button" class="secondary">Log out</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- One message area for the whole page: errors and successes from the API -->
+        <p id="message" class="message" role="status" hidden></p>
+
+        <!-- ===== Logged-out screen: sign up and log in ===== -->
+        <section id="auth-screen">
+            <div class="card">
+                <h2>Log in</h2>
+                <form id="login-form">
+                    <label>Email <input type="email" name="email" required autocomplete="email"></label>
+                    <label>Password <input type="password" name="password" required autocomplete="current-password"></label>
+                    <button type="submit">Log in</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Sign up</h2>
+                <form id="signup-form">
+                    <label>Email <input type="email" name="email" required autocomplete="email"></label>
+                    <label>Display name <input type="text" name="display_name" required autocomplete="nickname"></label>
+                    <label>Password (at least 8 characters)
+                        <input type="password" name="password" required minlength="8" autocomplete="new-password">
+                    </label>
+                    <button type="submit">Create account</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ===== Logged-in screen: new post, friends, feed ===== -->
+        <section id="app-screen" hidden>
+            <div class="card">
+                <h2>New post</h2>
+                <form id="post-form">
+                    <textarea name="body" rows="3" maxlength="500" placeholder="What's on your mind? (10 to 500 characters)"></textarea>
+                    <div class="row">
+                        <span id="post-counter" class="counter">0 / 500</span>
+                        <button type="submit" id="post-button" disabled>Post</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Friends</h2>
+                <p class="hint">There is no user search yet: share your user number (shown at the top) with a friend and ask for theirs.</p>
+                <form id="friend-request-form" class="inline-form">
+                    <label>Send friend request to user #
+                        <input type="number" name="receiver_id" min="1" required>
+                    </label>
+                    <button type="submit">Send request</button>
+                </form>
+                <form id="friend-accept-form" class="inline-form">
+                    <label>Accept request from user #
+                        <input type="number" name="sender_id" min="1" required>
+                    </label>
+                    <button type="submit">Accept</button>
+                </form>
+            </div>
+
+            <h2 class="feed-title">Your feed</h2>
+            <p id="feed-empty" class="hint" hidden>No posts yet. Write one, or add a friend.</p>
+            <ul id="feed" class="feed"></ul>
+            <button id="load-more-button" type="button" class="secondary wide" hidden>Load more</button>
+        </section>
+    </main>
+
+    <!-- Template for one post in the feed. app.js copies it for every post
+         and fills in the text with textContent (never innerHTML), so any HTML
+         a user types in a post is shown as plain text, not run. -->
+    <template id="post-template">
+        <li class="card post">
+            <div class="post-head">
+                <strong class="post-author"></strong>
+                <time class="post-time"></time>
+            </div>
+            <p class="post-body"></p>
+            <div class="post-stats">
+                <span class="post-likes"></span> ·
+                <span class="post-comments"></span>
+            </div>
+            <div class="post-actions">
+                <button type="button" class="like-button secondary">Like</button>
+                <button type="button" class="delete-button danger">Delete</button>
+            </div>
+            <form class="comment-form">
+                <input type="text" name="body" maxlength="500" placeholder="Write a comment (10+ characters)">
+                <button type="submit" class="secondary">Comment</button>
+            </form>
+            <p class="post-message message" hidden></p>
+        </li>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>

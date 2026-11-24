@@ -17,6 +17,10 @@ src/
   routes/posts.js          /posts, /posts/:id, likes, comments
   routes/feed.js           /feed
   routes/friendships.js    /friendships
+public/
+  index.html               the web front end's page
+  style.css                its styles
+  app.js                   its JavaScript: calls the API with fetch()
 tests/
   helpers.js               resets the test database
   auth.test.js             sign-up, login and token tests
@@ -69,6 +73,28 @@ The tests delete and recreate every table in the test database on each run, so
 never point `.env.test` at your real database.
 
 Handy psql commands: `\dt` list tables, `\d posts` describe a table, `\q` quit.
+
+## Web front end
+
+The server also serves a simple web page from `public/` (plain HTML, CSS and
+JavaScript, no build step). Start the server with `npm run dev`, then open
+http://localhost:3000 in a browser. From there you can:
+
+- sign up, log in and log out (the login token is kept in the browser's
+  `localStorage`; after it expires, an hour later, you are sent back to the
+  login screen)
+- see your user number ("Logged in as user #3"), which friends need to send
+  you a request, since there is no user search yet
+- write posts (with a 10–500 character counter)
+- read your feed 10 posts at a time, with a "Load more" button
+- like and unlike, comment on, and delete posts
+- send a friend request to a user number, and accept a request from one
+
+The page uses exactly the same API routes as curl or the tests do, with the
+`Authorization: Bearer <token>` header, and shows the API's error messages.
+Because the feed doesn't say who wrote a post or whether you already liked
+it, every post has a Delete button (the API answers 403 if it isn't yours)
+and a Like button that turns into Unlike if the API says you already liked it.
 
 ## API
 

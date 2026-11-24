@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const app = express()
 const pool = require('./db')
 const authRouter = require('./routes/auth');
@@ -7,6 +8,9 @@ const feedRouter = require('./routes/feed');
 const friendshipsRouter = require('./routes/friendships');
 
 app.use(express.json());
+
+// Serve the web front end (public/index.html, style.css, app.js) from the same server.
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use('/', authRouter);
 app.use('/posts', postsRouter);
