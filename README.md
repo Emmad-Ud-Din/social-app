@@ -33,6 +33,7 @@ tests/
   feed.test.js             feed pagination: pages, cursors, friends only, bad input
   errors.test.js           error handling and login rate limiting
   friendships.test.js      the pending friend requests list
+  users.test.js            user search: case, sorting, not finding yourself
 .github/workflows/test.yml  runs npm test on GitHub for every push
 .env.example     template for .env (never commit .env)
 .env.test.example template for .env.test, used by npm test
