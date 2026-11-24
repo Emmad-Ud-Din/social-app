@@ -25,6 +25,7 @@ tests/
   helpers.js               resets the test database
   auth.test.js             sign-up, login and token tests
   posts.test.js            posting, likes and owner-only delete, as logged-in users
+  feed.test.js             feed pagination: pages, cursors, friends only, bad input
 .env.example     template for .env (never commit .env)
 .env.test.example template for .env.test, used by npm test
 ```
@@ -210,4 +211,4 @@ users ──< friendships >── users
 | 8 | Authorization: owner-only delete, 401 vs 403, `ON DELETE CASCADE` | ✅ |
 | 9 | Organising code: `express.Router()`, mounting, `require` paths, middleware order | ✅ |
 | 10 | Automated tests: `node:test`, `supertest`, a separate test database, testing logged-in routes | ✅ |
-| 11 | Pagination: `LIMIT`, cursors, indexes, `EXPLAIN` | next |
+| 11 | Pagination: `LIMIT`, cursor pagination, row comparison, tests that page through the feed | ✅ (indexes and `EXPLAIN` next) |
