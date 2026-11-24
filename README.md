@@ -34,6 +34,7 @@ tests/
   errors.test.js           error handling and login rate limiting
   friendships.test.js      the pending friend requests list
   users.test.js            user search: case, sorting, not finding yourself
+  comments.test.js         viewing comments: order, empty list, 404/400/401
 .github/workflows/test.yml  runs npm test on GitHub for every push
 .env.example     template for .env (never commit .env)
 .env.test.example template for .env.test, used by npm test

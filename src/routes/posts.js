@@ -80,7 +80,7 @@ router.delete('/:id/likes', async (req, res) => {
 
 router.get('/:id/comments', async (req, res) => {
     const postId = Number(req.params.id);
-    if (!Number.isInteger(postId)) {
+    if (!Number.isInteger(postId) || postId < 1) {
         return res.status(400).json({ error: "post id must be a number" });
     }
 
