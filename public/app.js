@@ -173,6 +173,10 @@ function commentOnPost(postId, body) {
     return api('POST', '/posts/' + postId + '/comments', { body: body });
 }
 
+function getComments(postId) {
+    return api('GET', '/posts/' + postId + '/comments');
+}
+
 function sendFriendRequest(receiverId) {
     return api('POST', '/friendships', { receiver_id: receiverId });
 }
@@ -393,6 +397,50 @@ function renderPost(post) {
         }
     });
 
+    // Show / hide the comments: click "2 comments".
+    const commentList = li.querySelector('.comment-list');
+
+    async function loadComments() {
+        let data;
+        try {
+            data = await getComments(post.id);
+        } catch (err) {
+            showMessage(messageEl, err.message, true);
+            return;
+        }
+        commentList.replaceChildren();
+        for (const comment of data.comments) {
+            const item = document.createElement('li');
+            const head = document.createElement('div');
+            head.className = 'comment-head';
+            const author = document.createElement('strong');
+            // textContent, never innerHTML: names and comments are typed by users.
+            author.textContent = comment.display_name;
+            const time = document.createElement('time');
+            time.className = 'post-time';
+            time.textContent = formatTime(comment.time_created);
+            time.dateTime = comment.time_created;
+            head.append(author, time);
+            const body = document.createElement('p');
+            body.textContent = comment.body;
+            item.append(head, body);
+            commentList.append(item);
+        }
+        // The real count, in case others commented since the feed loaded.
+        comments = data.comments.length;
+        updateCounts();
+    }
+
+    commentsEl.addEventListener('click', async () => {
+        hideMessage(messageEl);
+        const opening = commentList.hidden;
+        if (opening) {
+            await loadComments();
+        }
+        commentList.hidden = !opening;
+        commentsEl.setAttribute('aria-expanded', String(opening));
+    });
+
     // Comment
     const commentForm = li.querySelector('.comment-form');
     commentForm.addEventListener('submit', async (event) => {
@@ -404,6 +452,9 @@ function renderPost(post) {
             comments += 1;
             updateCounts();
             input.value = '';
+            if (!commentList.hidden) {
+                await loadComments();  // show the new comment in the open list
+            }
             showMessage(messageEl, 'Comment added.', false);
         } catch (err) {
             showMessage(messageEl, err.message, true);

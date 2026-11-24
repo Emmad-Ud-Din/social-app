@@ -31,6 +31,16 @@ test('a body that is not valid JSON is a JSON 400', async () => {
     assert.strictEqual(res.body.error, 'request body is not valid JSON');
 });
 
+test('a number too big for BIGINT is a JSON 400, not a 500', async () => {
+    // Number('99999999999999999999') is a valid JS integer, but Postgres
+    // can't fit it in a BIGINT column and raises error 22003.
+    const res = await request(app)
+        .get('/feed?cursor=99999999999999999999')
+        .set('Authorization', `Bearer ${fay.token}`);
+    assert.strictEqual(res.status, 400);
+    assert.strictEqual(res.body.error, 'a number is out of range');
+});
+
 test('a database error in a route without try/catch is a JSON 500', async () => {
     // Make the feed's query fail on purpose: rename the posts table for a moment.
     await pool.query('ALTER TABLE posts RENAME TO posts_hidden');

@@ -97,6 +97,7 @@ http://localhost:3000 in a browser. From there you can:
 - write posts (with a 10–500 character counter)
 - read your feed 10 posts at a time, with a "Load more" button
 - like and unlike, comment on, and delete posts
+- click "2 comments" under a post to read its comments, oldest first
 - see the friend requests sent to you, each with an Accept button
 
 The page uses exactly the same API routes as curl or the tests do, with the
@@ -130,6 +131,7 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 | DELETE | `/posts/:id` | | 204, no body; the post's likes and comments are removed too | 400 invalid post id, 403 not your post, 404 post not found |
 | POST | `/posts/:id/likes` | | 201, the new like | 400 invalid post id, 404 post not found, 409 already liked |
 | DELETE | `/posts/:id/likes` | | 204, no body | 400 invalid post id, 404 post was never liked |
+| GET | `/posts/:id/comments` | | 200 `{ comments }`: the post's comments, oldest first. Each has `id`, `body`, `time_created`, `author_id` and `display_name`. A post with no comments gives `[]` | 400 invalid post id, 404 post not found |
 | POST | `/posts/:id/comments` | `{ "body" }` | 201, the new comment | 400 invalid post id or body length, 404 post not found |
 | POST | `/friendships` | `{ "receiver_id" }` | 201, a `pending` request from you | 400 to yourself, missing or invalid id; 404 user not found; 409 request already exists (either direction) |
 | GET | `/users/search?q=` | | 200 `{ users }`: up to 20 users whose `display_name` contains `q` (any case), sorted by name, never including you. Each has only `id` and `display_name` | 400 `q` missing, blank or over 50 characters |
@@ -144,7 +146,8 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 | GET | `/db-check` | 200 `{"posts":7}` |
 
 Unknown routes return 404 `{"error":"not found"}`, a body that isn't valid JSON
-returns 400, and unexpected errors return 500 `{"error":"Something went wrong"}`.
+returns 400, a number too big for the database returns 400, a number too big for the database (e.g. a huge id) returns 400,
+and unexpected errors return 500 `{"error":"Something went wrong"}`.
 All of these come from one central error handler (`src/middleware/errors.js`);
 error details are logged on the server and never sent to the client.
 
@@ -227,3 +230,4 @@ users ──< friendships >── users
 | 13 | Central error handling, login rate limiting (429), continuous integration with GitHub Actions | ✅ |
 | 14 | Feature: pending friend requests (`GET /friendships/pending`), only requests sent *to* the logged-in user | ✅ |
 | 15 | Feature: user search, `req.query`, `ILIKE` and `%` wildcards, returning only public columns | ✅ |
+| 16 | Feature: viewing comments, `select 1` to tell "not found" (404) from "empty" (200 `[]`), `JOIN` for names | ✅ |

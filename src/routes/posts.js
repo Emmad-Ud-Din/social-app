@@ -78,6 +78,28 @@ router.delete('/:id/likes', async (req, res) => {
 
 });
 
+router.get('/:id/comments', async (req, res) => {
+    const postId = Number(req.params.id);
+    if (!Number.isInteger(postId)) {
+        return res.status(400).json({ error: "post id must be a number" });
+    }
+
+    const post = await pool.query('select 1 from posts where id = $1', [postId]);
+    if (post.rowCount=== 0) {
+        return res.status(404).json({ error: 'post not found' });
+    }
+
+    const result = await pool.query(
+        `select c.id, c.body, c.time_created, c.user_id as author_id, u.display_name
+        from comments c
+        join users u on u.id = c.user_id
+        where c.post_id = $1
+        order by c.time_created asc, c.id asc`,
+        [postId]
+    );
+    res.json({ comments: result.rows });
+});
+
 router.post('/:id/comments', async (req, res) => {
     const postId = Number(req.params.id);
     if (!Number.isInteger(postId) || postId < 1) {

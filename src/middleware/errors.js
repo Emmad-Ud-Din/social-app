@@ -18,6 +18,7 @@ const PG_CLIENT_ERRORS = {
     '23514': [400, 'a value breaks a rule'],            // CHECK constraint
     '23502': [400, 'a required value is missing'],      // NOT NULL
     '22P02': [400, 'a value has the wrong type'],       // e.g. "abc" for a number
+    '22003': [400, 'a number is out of range'],         // e.g. an id bigger than BIGINT
 };
 
 function notFound(req, res) {

@@ -91,12 +91,13 @@
             <p class="post-body"></p>
             <div class="post-stats">
                 <span class="post-likes"></span> ·
-                <span class="post-comments"></span>
+                <button type="button" class="post-comments link-button" aria-expanded="false"></button>
             </div>
             <div class="post-actions">
                 <button type="button" class="like-button secondary">Like</button>
                 <button type="button" class="delete-button danger">Delete</button>
             </div>
+            <ul class="comment-list" hidden></ul>
             <form class="comment-form">
                 <input type="text" name="body" maxlength="500" placeholder="Write a comment (10+ characters)">
                 <button type="submit" class="secondary">Comment</button>
