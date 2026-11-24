@@ -20,20 +20,24 @@ router.get('/', async (req, res) => {
     }
 
     const result = await pool.query(
-        `select p.id ,p.body, p.time_created, u.display_name, count (l.user_id)::int as likes, 
-        (select count (*)::int from comments c where c.post_id=p.id) as comments
-        from posts p
-        join users u on u.id = p.user_id
-        left join likes l on l.post_id=p.id
-        where (p.user_id =$1 
-        or p.user_id in (select case when sender_id=$1 then  receiver_id else sender_id end as friend_id
-        from friendships
-        where (sender_id = $1 or receiver_id =$1) and status='accepted'))
-          and ($2::bigint is null
-               or (p.time_created, p.id) < (select time_created, id from posts where id = $2))
-        group by p.id, u.id
-        order by p.time_created desc, p.id desc
-        limit $3;
+        `with page as (
+            select p.id, p.user_id, p.body, p.time_created
+            from posts p
+            where (p.user_id = $1
+                   or p.user_id in (select case when sender_id = $1 then receiver_id else sender_id end
+                                    from friendships
+                                    where (sender_id = $1 or receiver_id = $1) and status = 'accepted'))
+              and ($2::bigint is null
+                   or (p.time_created, p.id) < (select time_created, id from posts where id = $2))
+            order by p.time_created desc, p.id desc
+            limit $3
+        )
+        select page.id, page.body, page.time_created, u.display_name,
+               (select count(*)::int from likes l where l.post_id = page.id) as likes,
+               (select count(*)::int from comments c where c.post_id = page.id) as comments
+        from page
+        join users u on u.id = page.user_id
+        order by page.time_created desc, page.id desc;
         `, [req.userId, cursor, limit+1]
     );
    const rows = result.rows;

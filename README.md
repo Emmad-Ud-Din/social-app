@@ -211,4 +211,4 @@ users ──< friendships >── users
 | 8 | Authorization: owner-only delete, 401 vs 403, `ON DELETE CASCADE` | ✅ |
 | 9 | Organising code: `express.Router()`, mounting, `require` paths, middleware order | ✅ |
 | 10 | Automated tests: `node:test`, `supertest`, a separate test database, testing logged-in routes | ✅ |
-| 11 | Pagination: `LIMIT`, cursor pagination, row comparison, tests that page through the feed | ✅ (indexes and `EXPLAIN` next) |
+| 11 | Pagination and performance: cursor pagination, row comparison, indexes, `EXPLAIN ANALYZE`, `WITH` (limit first, count after), indexing foreign keys | ✅ |

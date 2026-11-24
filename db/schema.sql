@@ -46,3 +46,8 @@ status friendship NOT NULL DEFAULT 'pending',
 time_sent TIMESTAMPTZ NOT NULL DEFAULT now(),
 CHECK(sender_id<>receiver_id));
 CREATE UNIQUE INDEX request_order ON friendships ( least(sender_id, receiver_id), greatest(sender_id, receiver_id));
+
+-- Indexes for the feed (Lesson 11)
+CREATE INDEX posts_user_time_idx ON posts (user_id, time_created DESC, id DESC);
+CREATE INDEX likes_post_idx ON likes (post_id);
+CREATE INDEX comments_post_idx ON comments (post_id);
