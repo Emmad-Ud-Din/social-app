@@ -6,6 +6,7 @@ const authRouter = require('./routes/auth');
 const postsRouter = require('./routes/posts');
 const feedRouter = require('./routes/feed');
 const friendshipsRouter = require('./routes/friendships');
+const { notFound, errorHandler } = require('./middleware/errors');
 
 app.use(express.json());
 
@@ -29,5 +30,9 @@ app.get('/db-check', async (req, res) => {
     const result = await pool.query('SELECT count(*)::int from posts');
     res.json({ posts: result.rows[0].count });
 });
+
+// These two must come LAST: Express only reaches them if nothing above answered.
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = app;

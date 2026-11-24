@@ -1,5 +1,7 @@
 # Social App (Mini Facebook)
 
+![tests](https://github.com/Emmad-Ud-Din/social-app/actions/workflows/test.yml/badge.svg)
+
 A learning project: a small social network backend with PostgreSQL and a
 Node + Express API, built one exercise at a time.
 
@@ -13,6 +15,8 @@ src/
   app.js                   creates the app and mounts the routers (used by the tests)
   db.js                    the Postgres connection pool
   middleware/auth.js       requireAuth: checks the login token
+  middleware/errors.js     JSON 404 for unknown routes, central error handler
+  middleware/loginLimiter.js  blocks login after 5 wrong passwords (15 min)
   routes/auth.js           /signup, /login
   routes/posts.js          /posts, /posts/:id, likes, comments
   routes/feed.js           /feed
@@ -26,6 +30,8 @@ tests/
   auth.test.js             sign-up, login and token tests
   posts.test.js            posting, likes and owner-only delete, as logged-in users
   feed.test.js             feed pagination: pages, cursors, friends only, bad input
+  errors.test.js           error handling and login rate limiting
+.github/workflows/test.yml  runs npm test on GitHub for every push
 .env.example     template for .env (never commit .env)
 .env.test.example template for .env.test, used by npm test
 ```
@@ -104,7 +110,7 @@ and a Like button that turns into Unlike if the API says you already liked it.
 | Method | Route | Body | Success | Errors |
 |---|---|---|---|---|
 | POST | `/signup` | `{ "email", "display_name", "password" }` | 201, the new user (never the password hash) | 400 missing field or password under 8 characters, 409 email already registered |
-| POST | `/login` | `{ "email", "password" }` | 200 `{ "token": "..." }`, valid for 1 hour | 400 missing field, 401 invalid email or password |
+| POST | `/login` | `{ "email", "password" }` | 200 `{ "token": "..." }`, valid for 1 hour | 400 missing field, 401 invalid email or password, 429 after 5 wrong passwords for the same email (blocked for 15 minutes) |
 
 Passwords are hashed with bcrypt before they are stored. The token is a JWT
 signed with `JWT_SECRET`; its payload is `{ "userId": ... }`.
@@ -134,8 +140,10 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 | GET | `/health` | 200 `{"status":"ok"}` |
 | GET | `/db-check` | 200 `{"posts":7}` |
 
-Unexpected errors return 500 `{"error":"Something went wrong"}` and are logged
-on the server; error details are never sent to the client.
+Unknown routes return 404 `{"error":"not found"}`, a body that isn't valid JSON
+returns 400, and unexpected errors return 500 `{"error":"Something went wrong"}`.
+All of these come from one central error handler (`src/middleware/errors.js`);
+error details are logged on the server and never sent to the client.
 
 ### Trying it with curl (PowerShell)
 
@@ -213,3 +221,4 @@ users ──< friendships >── users
 | 10 | Automated tests: `node:test`, `supertest`, a separate test database, testing logged-in routes | ✅ |
 | 11 | Pagination and performance: cursor pagination, row comparison, indexes, `EXPLAIN ANALYZE`, `WITH` (limit first, count after), indexing foreign keys | ✅ |
 | 12 | Evolving an API: adding fields without breaking clients, `EXISTS`, using the new fields in the front end | ✅ |
+| 13 | Central error handling, login rate limiting (429), continuous integration with GitHub Actions | ✅ |

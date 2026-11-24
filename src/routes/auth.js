@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { checkLoginLimit, recordFailure, clearFailures } = require('../middleware/loginLimiter');
 
 
 router.post("/signup", async (req, res) => {
@@ -34,7 +35,7 @@ router.post("/signup", async (req, res) => {
     }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", checkLoginLimit, async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ error: 'email and password are required' });
@@ -48,14 +49,18 @@ router.post("/login", async (req, res) => {
         const user = result.rows[0];
 
         if (!user) {
+            recordFailure(req);
             return res.status(401).json({ error: "invalid email or password" });
         }
 
         const passOk = await bcrypt.compare(password, user.password_hash);
 
         if (!passOk) {
+            recordFailure(req);
             return res.status(401).json({ error: "invalid email or password" });
         }
+
+        clearFailures(req);
 
         const token = jwt.sign(
             { userId: user.id },

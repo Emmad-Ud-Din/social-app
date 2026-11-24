@@ -1,0 +1,46 @@
+# Runs the automated tests on GitHub for every push and pull request.
+# GitHub starts a fresh Linux machine with a PostgreSQL database, installs
+# the project, and runs `npm test`. The result shows as a tick or cross
+# next to each commit.
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # A throwaway PostgreSQL server just for this run
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: mini_fb
+          POSTGRES_PASSWORD: mini_fb
+          POSTGRES_DB: mini_fb_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The same settings as a local .env.test, pointing at the database above
+      - run: |
+          echo "DATABASE_URL=postgres://mini_fb:mini_fb@localhost:5432/mini_fb_test" > .env.test
+          echo "JWT_SECRET=ci-test-secret" >> .env.test
+
+      - run: npm test
