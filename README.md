@@ -146,7 +146,7 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 | GET | `/db-check` | 200 `{"posts":7}` |
 
 Unknown routes return 404 `{"error":"not found"}`, a body that isn't valid JSON
-returns 400, a number too big for the database returns 400, a number too big for the database (e.g. a huge id) returns 400,
+returns 400, a number too big for the database (e.g. a huge id) returns 400,
 and unexpected errors return 500 `{"error":"Something went wrong"}`.
 All of these come from one central error handler (`src/middleware/errors.js`);
 error details are logged on the server and never sent to the client.
