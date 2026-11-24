@@ -181,6 +181,10 @@ function acceptFriendRequest(senderId) {
     return api('PATCH', '/friendships/' + senderId, { status: 'accepted' });
 }
 
+function searchUsers(q) {
+    return api('GET', '/users/search?q=' + encodeURIComponent(q));
+}
+
 function getPendingRequests() {
     return api('GET', '/friendships/pending');
 }
@@ -507,16 +511,38 @@ postForm.addEventListener('submit', async (event) => {
     }
 });
 
-$('friend-request-form').addEventListener('submit', async (event) => {
+$('user-search-form').addEventListener('submit', async (event) => {
     event.preventDefault();
-    const form = event.target;
-    const receiverId = Number(form.elements.receiver_id.value);
+    const q = event.target.elements.q.value;
+    let data;
     try {
-        await sendFriendRequest(receiverId);
-        pageMessage('Friend request sent to user #' + receiverId + '.', false);
-        form.reset();
+        data = await searchUsers(q);
     } catch (err) {
         pageMessage(err.message, true);
+        return;
+    }
+    const list = $('search-results');
+    list.replaceChildren();
+    $('search-empty').hidden = data.users.length > 0;
+    for (const user of data.users) {
+        const item = document.createElement('li');
+        const who = document.createElement('span');
+        // textContent, never innerHTML: a display name is text typed by a user.
+        who.textContent = user.display_name + ' (user #' + user.id + ')';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = 'Add friend';
+        button.addEventListener('click', async () => {
+            try {
+                await sendFriendRequest(user.id);
+                button.textContent = 'Request sent';
+                button.disabled = true;
+            } catch (err) {
+                pageMessage(err.message, true);
+            }
+        });
+        item.append(who, button);
+        list.append(item);
     }
 });
 

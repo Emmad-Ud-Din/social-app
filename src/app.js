@@ -6,6 +6,7 @@ const authRouter = require('./routes/auth');
 const postsRouter = require('./routes/posts');
 const feedRouter = require('./routes/feed');
 const friendshipsRouter = require('./routes/friendships');
+const usersRouter = require('./routes/users');
 const { notFound, errorHandler } = require('./middleware/errors');
 
 app.use(express.json());
@@ -17,6 +18,7 @@ app.use('/', authRouter);
 app.use('/posts', postsRouter);
 app.use('/feed', feedRouter);
 app.use('/friendships', friendshipsRouter);
+app.use('/users', usersRouter);
 
 app.get('/hello', (req, res) => {
     res.json({ message: ' Hello from my API' });

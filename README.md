@@ -21,6 +21,7 @@ src/
   routes/posts.js          /posts, /posts/:id, likes, comments
   routes/feed.js           /feed
   routes/friendships.js    /friendships
+  routes/users.js          /users/search
 public/
   index.html               the web front end's page
   style.css                its styles
@@ -91,13 +92,11 @@ http://localhost:3000 in a browser. From there you can:
 - sign up, log in and log out (the login token is kept in the browser's
   `localStorage`; after it expires, an hour later, you are sent back to the
   login screen)
-- see your user number ("Logged in as user #3"), which friends need to send
-  you a request, since there is no user search yet
+- search for people by name and send them a friend request
 - write posts (with a 10–500 character counter)
 - read your feed 10 posts at a time, with a "Load more" button
 - like and unlike, comment on, and delete posts
-- send a friend request to a user number, and see the requests sent to you,
-  each with an Accept button
+- see the friend requests sent to you, each with an Accept button
 
 The page uses exactly the same API routes as curl or the tests do, with the
 `Authorization: Bearer <token>` header, and shows the API's error messages.
@@ -132,6 +131,7 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 | DELETE | `/posts/:id/likes` | | 204, no body | 400 invalid post id, 404 post was never liked |
 | POST | `/posts/:id/comments` | `{ "body" }` | 201, the new comment | 400 invalid post id or body length, 404 post not found |
 | POST | `/friendships` | `{ "receiver_id" }` | 201, a `pending` request from you | 400 to yourself, missing or invalid id; 404 user not found; 409 request already exists (either direction) |
+| GET | `/users/search?q=` | | 200 `{ users }`: up to 20 users whose `display_name` contains `q` (any case), sorted by name, never including you. Each has only `id` and `display_name` | 400 `q` missing, blank or over 50 characters |
 | GET | `/friendships/pending` | | 200 `{ requests }`: requests other users sent you that are still pending, newest first. Each has `sender_id`, `display_name` and `time_sent`. Requests you sent are not included | |
 | PATCH | `/friendships/:senderId` | `{ "status": "accepted" }` | 200, the accepted request (only the receiver can accept) | 400 invalid id or status, 404 no pending request from that user |
 
@@ -225,3 +225,4 @@ users ──< friendships >── users
 | 12 | Evolving an API: adding fields without breaking clients, `EXISTS`, using the new fields in the front end | ✅ |
 | 13 | Central error handling, login rate limiting (429), continuous integration with GitHub Actions | ✅ |
 | 14 | Feature: pending friend requests (`GET /friendships/pending`), only requests sent *to* the logged-in user | ✅ |
+| 15 | Feature: user search, `req.query`, `ILIKE` and `%` wildcards, returning only public columns | ✅ |

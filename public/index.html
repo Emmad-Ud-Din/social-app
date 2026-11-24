@@ -59,13 +59,14 @@
 
             <div class="card">
                 <h2>Friends</h2>
-                <p class="hint">There is no user search yet: share your user number (shown at the top) with a friend and ask for theirs.</p>
-                <form id="friend-request-form" class="inline-form">
-                    <label>Send friend request to user #
-                        <input type="number" name="receiver_id" min="1" required>
+                <form id="user-search-form" class="inline-form">
+                    <label>Find people by name
+                        <input type="search" name="q" maxlength="50" required placeholder="e.g. Gus">
                     </label>
-                    <button type="submit">Send request</button>
+                    <button type="submit">Search</button>
                 </form>
+                <p id="search-empty" class="hint" hidden>No one found.</p>
+                <ul id="search-results" class="pending-list"></ul>
                 <h3>Requests sent to you</h3>
                 <p id="pending-empty" class="hint">No pending requests.</p>
                 <ul id="pending-list" class="pending-list"></ul>
