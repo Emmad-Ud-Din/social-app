@@ -353,3 +353,37 @@ h3 {
     gap: 8px;
     margin-bottom: 8px;
 }
+
+.name-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+}
+
+.name-link:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+#profile-back {
+    margin-bottom: 12px;
+}
+
+.profile-card h2 {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+}
+
+.profile-bio {
+    margin: 0 0 6px;
+    white-space: pre-wrap;
+}
+
+#profile-action {
+    margin-top: 10px;
+}

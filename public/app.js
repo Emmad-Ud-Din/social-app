@@ -193,6 +193,10 @@ function searchUsers(q) {
     return api('GET', '/users/search?q=' + encodeURIComponent(q));
 }
 
+function getProfile(userId) {
+    return api('GET', '/users/' + userId);
+}
+
 function getPendingRequests() {
     return api('GET', '/friendships/pending');
 }
@@ -236,6 +240,7 @@ function showScreen() {
         }
         $('auth-screen').hidden = false;
         $('app-screen').hidden = true;
+        $('profile-screen').hidden = true;
         $('user-bar').hidden = true;
         return;
     }
@@ -243,6 +248,7 @@ function showScreen() {
     $('who-am-i').textContent = 'Logged in as user #' + payload.userId;
     $('auth-screen').hidden = true;
     $('app-screen').hidden = false;
+    $('profile-screen').hidden = true;
     $('user-bar').hidden = false;
     loadFeed(true);
     loadPendingRequests();
@@ -262,9 +268,12 @@ async function loadPendingRequests() {
     $('pending-empty').hidden = data.requests.length > 0;
     for (const request of data.requests) {
         const item = document.createElement('li');
-        const who = document.createElement('span');
+        const who = document.createElement('button');
+        who.type = 'button';
+        who.className = 'name-link';
         // textContent, never innerHTML: a display name is text typed by a user.
         who.textContent = request.display_name + ' (user #' + request.sender_id + ')';
+        who.addEventListener('click', () => openProfile(request.sender_id));
         const button = document.createElement('button');
         button.type = 'button';
         button.textContent = 'Accept';
@@ -330,6 +339,9 @@ function renderPost(post) {
     const messageEl = li.querySelector('.post-message');
 
     li.querySelector('.post-author').textContent = post.display_name;
+    if (post.author_id !== undefined) {
+        li.querySelector('.post-author').addEventListener('click', () => openProfile(post.author_id));
+    }
     li.querySelector('.post-body').textContent = post.body;
     const timeEl = li.querySelector('.post-time');
     timeEl.textContent = formatTime(post.time_created);
@@ -626,9 +638,12 @@ $('user-search-form').addEventListener('submit', async (event) => {
     $('search-empty').hidden = data.users.length > 0;
     for (const user of data.users) {
         const item = document.createElement('li');
-        const who = document.createElement('span');
+        const who = document.createElement('button');
+        who.type = 'button';
+        who.className = 'name-link';
         // textContent, never innerHTML: a display name is text typed by a user.
         who.textContent = user.display_name + ' (user #' + user.id + ')';
+        who.addEventListener('click', () => openProfile(user.id));
         const button = document.createElement('button');
         button.type = 'button';
         button.textContent = 'Add friend';
@@ -643,6 +658,112 @@ $('user-search-form').addEventListener('submit', async (event) => {
         });
         item.append(who, button);
         list.append(item);
+    }
+});
+
+// =====================================================================
+// Profile screen
+// =====================================================================
+
+// Opens a user's profile in place of the feed.
+async function openProfile(userId) {
+    let data;
+    try {
+        data = await getProfile(userId);
+    } catch (err) {
+        pageMessage(err.message, true);
+        return;
+    }
+    renderProfile(data);
+    $('app-screen').hidden = true;
+    $('profile-screen').hidden = false;
+    window.scrollTo(0, 0);
+}
+
+function closeProfile() {
+    $('profile-screen').hidden = true;
+    $('app-screen').hidden = false;
+}
+
+function renderProfile(data) {
+    const user = data.user;
+    $('profile-name').textContent = user.display_name;
+    $('profile-bio').textContent = user.bio || '';
+    $('profile-bio').hidden = !user.bio;
+    $('profile-meta').textContent =
+        'User #' + user.id +
+        ' · joined ' + new Date(user.date_created).toLocaleDateString() +
+        ' · ' + plural(data.friend_count, 'friend');
+
+    // The button depends on what this user is to you.
+    const action = $('profile-action');
+    action.replaceChildren();
+    const button = document.createElement('button');
+    button.type = 'button';
+    if (data.relationship === 'none') {
+        button.textContent = 'Add friend';
+        button.addEventListener('click', async () => {
+            try {
+                await sendFriendRequest(user.id);
+                openProfile(user.id);
+            } catch (err) {
+                pageMessage(err.message, true);
+            }
+        });
+    } else if (data.relationship === 'request_received') {
+        button.textContent = 'Accept friend request';
+        button.addEventListener('click', async () => {
+            try {
+                await acceptFriendRequest(user.id);
+                pageMessage('You are now friends with ' + user.display_name + '.', false);
+                openProfile(user.id);
+                loadPendingRequests();
+                loadFeed(true);
+            } catch (err) {
+                pageMessage(err.message, true);
+            }
+        });
+    } else if (data.relationship === 'request_sent') {
+        button.textContent = 'Friend request sent';
+        button.disabled = true;
+    } else if (data.relationship === 'friends') {
+        button.textContent = 'Friends ✓';
+        button.className = 'secondary';
+        button.disabled = true;
+    }
+    if (data.relationship !== 'self') {
+        action.append(button);
+    }
+
+    // Posts: only you and your friends get them; everyone else gets [].
+    const list = $('profile-posts');
+    list.replaceChildren();
+    const note = $('profile-posts-note');
+    const canSee = data.relationship === 'self' || data.relationship === 'friends';
+    note.hidden = canSee && data.posts.length > 0;
+    note.textContent = canSee
+        ? 'No posts yet.'
+        : 'Only ' + user.display_name + "'s friends can see their posts.";
+    for (const post of data.posts) {
+        const item = document.createElement('li');
+        item.className = 'card post';
+        const time = document.createElement('time');
+        time.className = 'post-time';
+        time.dateTime = post.time_created;
+        time.textContent = formatTime(post.time_created) + (post.edited_at ? ' · edited' : '');
+        const body = document.createElement('p');
+        body.className = 'post-body';
+        body.textContent = post.body;
+        item.append(time, body);
+        list.append(item);
+    }
+}
+
+$('profile-back').addEventListener('click', closeProfile);
+$('my-profile-button').addEventListener('click', () => {
+    const me = readTokenPayload(getToken());
+    if (me) {
+        openProfile(me.userId);
     }
 });
 

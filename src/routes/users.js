@@ -4,10 +4,10 @@ const pool = require('../db');
 const requireAuth = require('../middleware/auth');
 router.use(requireAuth);
 
-router.get('/search', async(req,res)=>{
+router.get('/search', async (req, res) => {
     const raw = req.query.q;
-    if (typeof raw !== 'string'){
-        return res.status(400).json({error: 'q is required'});
+    if (typeof raw !== 'string') {
+        return res.status(400).json({ error: 'q is required' });
     }
     const q = raw.trim();
     if (q.length === 0) {
@@ -31,4 +31,65 @@ router.get('/search', async(req,res)=>{
     res.json({ users: result.rows });
 });
 
-module.exports=router;
+router.get('/:id', async (req, res) => {
+    const userId = Number(req.params.id);
+    if (!Number.isInteger(userId) || userId < 1) {
+        return res.status(400).json({ error: 'user id must be a number' });
+    }
+
+    const found = await pool.query(
+        'select id, display_name, bio, date_created from users where id = $1',
+        [userId]
+    );
+    const user = found.rows[0];
+    if (!user) {
+        return res.status(404).json({ error: 'user not found' });
+    }
+
+    const friends = await pool.query(
+        `select count(*) as friend_count
+    from friendships
+    where (sender_id = $1 or receiver_id = $1)
+    and status = 'accepted'`,
+        [userId]
+    );
+    const friendCount = friends.rows[0].friend_count;
+
+    let relationship;
+    if (userId === req.userId) {
+        relationship = 'self';
+    } else {
+        const link = await pool.query(
+            `select sender_id, status from friendships
+        where (sender_id = $1 and receiver_id = $2)
+           or (sender_id = $2 and receiver_id = $1)`,
+            [userId, req.userId]
+        );
+        const row = link.rows[0];
+        if (!row) {
+            relationship = 'none';
+        } else if (row.status === 'accepted') {
+            relationship = 'friends';
+        } else if (row.sender_id === req.userId) {
+            relationship = 'request_sent';
+        } else {
+            relationship = 'request_received';
+        }
+    }
+
+    let posts=[];
+    if(relationship=='self'||relationship=='friends'){
+        const result = await pool.query(
+            `select id, body, time_created, edited_at
+            from posts
+            where user_id = $1
+            order by time_created desc, id desc
+            limit 20`,
+            [userId]
+        );
+        posts= result.rows;
+    }
+    res.json({user, friend_count:friendCount, relationship, posts});
+})
+
+module.exports = router;

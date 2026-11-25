@@ -12,6 +12,7 @@
         <!-- Shown only when logged in (app.js removes the "hidden" attribute) -->
         <div id="user-bar" hidden>
             <span id="who-am-i"></span>
+            <button id="my-profile-button" type="button" class="secondary">My profile</button>
             <button id="logout-button" type="button" class="secondary">Log out</button>
         </div>
     </header>
@@ -77,6 +78,20 @@
             <ul id="feed" class="feed"></ul>
             <button id="load-more-button" type="button" class="secondary wide" hidden>Load more</button>
         </section>
+
+        <!-- ===== Profile screen: one user's name, friends and posts ===== -->
+        <section id="profile-screen" hidden>
+            <button id="profile-back" type="button" class="secondary">← Back to feed</button>
+            <div class="card profile-card">
+                <h2 id="profile-name"></h2>
+                <p id="profile-bio" class="profile-bio"></p>
+                <p id="profile-meta" class="hint"></p>
+                <div id="profile-action"></div>
+            </div>
+            <h2>Posts</h2>
+            <p id="profile-posts-note" class="hint" hidden></p>
+            <ul id="profile-posts" class="feed"></ul>
+        </section>
     </main>
 
     <!-- Template for one post in the feed. app.js copies it for every post
@@ -85,7 +100,7 @@
     <template id="post-template">
         <li class="card post">
             <div class="post-head">
-                <strong class="post-author"></strong>
+                <button type="button" class="post-author name-link"></button>
                 <span class="post-time-wrap"><time class="post-time"></time><span class="post-edited" hidden> · edited</span></span>
             </div>
             <p class="post-body"></p>
