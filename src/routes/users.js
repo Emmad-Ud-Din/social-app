@@ -78,7 +78,7 @@ router.get('/:id', async (req, res) => {
     }
 
     let posts=[];
-    if(relationship=='self'||relationship=='friends'){
+    if(relationship==='self'||relationship==='friends'){
         const result = await pool.query(
             `select id, body, time_created, edited_at
             from posts
