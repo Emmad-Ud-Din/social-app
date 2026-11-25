@@ -128,6 +128,43 @@ router.post('/:id/comments', async (req, res) => {
 
 });
 
+router.patch("/:id", async(req,res)=>{
+    const postId= Number(req.params.id);
+    if(!Number.isInteger(postId)||postId<1){
+        return res.status(400).json({error:"post id must be a valid number"});
+    }
+
+    if(typeof req.body?.body!=='string'){
+        return res.status(400).json({error: "body is required"});
+    }
+
+    const found= await pool.query('select user_id from posts where id=$1', [postId]);
+    const post = found.rows[0];
+    if(!post){
+        return res.status(404).json({error:'post not found'});
+    }
+    if(post.user_id!==req.userId){
+        return res.status(403).json({error:'you can only edit your own post'});
+    }
+
+    try{
+        const result= await pool.query(`
+            update posts 
+            set body = $1 , edited_at= now() 
+            where id =  $2
+            returning id, user_id, body, time_created, edited_at `,
+        [req.body.body, postId]
+    );
+    res.json(result.rows[0]);
+    } catch (err){
+        if(err.code === '23514'){
+            return res.status(400).json({error: 'post must be between 10 and 500 characters'});
+        }
+        throw err;
+    }
+
+})
+
 router.delete("/:id", async (req,res)=>{
     const postId=Number(req.params.id);
 

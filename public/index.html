@@ -86,15 +86,23 @@
         <li class="card post">
             <div class="post-head">
                 <strong class="post-author"></strong>
-                <time class="post-time"></time>
+                <span class="post-time-wrap"><time class="post-time"></time><span class="post-edited" hidden> · edited</span></span>
             </div>
             <p class="post-body"></p>
+            <form class="edit-form" hidden>
+                <textarea name="body" rows="3" maxlength="500"></textarea>
+                <div class="edit-actions">
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel-edit secondary">Cancel</button>
+                </div>
+            </form>
             <div class="post-stats">
                 <span class="post-likes"></span> ·
                 <button type="button" class="post-comments link-button" aria-expanded="false"></button>
             </div>
             <div class="post-actions">
                 <button type="button" class="like-button secondary">Like</button>
+                <button type="button" class="edit-button secondary">Edit</button>
                 <button type="button" class="delete-button danger">Delete</button>
             </div>
             <ul class="comment-list" hidden></ul>

@@ -97,13 +97,14 @@ http://localhost:3000 in a browser. From there you can:
 - search for people by name and send them a friend request
 - write posts (with a 10–500 character counter)
 - read your feed 10 posts at a time, with a "Load more" button
-- like and unlike, comment on, and delete posts
+- like and unlike, comment on, edit and delete posts (edited posts are marked
+  "edited")
 - click "2 comments" under a post to read its comments, oldest first
 - see the friend requests sent to you, each with an Accept button
 
 The page uses exactly the same API routes as curl or the tests do, with the
 `Authorization: Bearer <token>` header, and shows the API's error messages.
-Delete only appears on your own posts (the feed's `author_id`), and Like turns
+Edit and Delete only appear on your own posts (the feed's `author_id`), and Like turns
 into Unlike on posts you already liked (`liked_by_me`).
 
 ## API
@@ -127,8 +128,9 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 
 | Method | Route | Body | Success | Errors |
 |---|---|---|---|---|
-| GET | `/feed?limit=&cursor=` | | 200 `{ posts, nextCursor }`: your posts and your friends' posts, newest first. Each post has `id`, `author_id`, `body`, `time_created`, `display_name`, `likes`, `comments` and `liked_by_me`. Pass `nextCursor` back as `cursor` for the next page; it is `null` on the last page. `limit` defaults to 20, max 50 | 400 invalid `limit` or `cursor` |
+| GET | `/feed?limit=&cursor=` | | 200 `{ posts, nextCursor }`: your posts and your friends' posts, newest first. Each post has `id`, `author_id`, `body`, `time_created`, `edited_at` (`null` if never edited), `display_name`, `likes`, `comments` and `liked_by_me`. Pass `nextCursor` back as `cursor` for the next page; it is `null` on the last page. `limit` defaults to 20, max 50 | 400 invalid `limit` or `cursor` |
 | POST | `/posts` | `{ "body" }` | 201, the new post | 400 body not 10–500 characters |
+| PATCH | `/posts/:id` | `{ "body" }` | 200, the updated post with `edited_at` set; only the body can change | 400 invalid post id, missing body or body not 10–500 characters, 403 not your post, 404 post not found |
 | DELETE | `/posts/:id` | | 204, no body; the post's likes and comments are removed too | 400 invalid post id, 403 not your post, 404 post not found |
 | POST | `/posts/:id/likes` | | 201, the new like | 400 invalid post id, 404 post not found, 409 already liked |
 | DELETE | `/posts/:id/likes` | | 204, no body | 400 invalid post id, 404 post was never liked |
@@ -232,3 +234,4 @@ users ──< friendships >── users
 | 14 | Feature: pending friend requests (`GET /friendships/pending`), only requests sent *to* the logged-in user | ✅ |
 | 15 | Feature: user search, `req.query`, `ILIKE` and `%` wildcards, returning only public columns | ✅ |
 | 16 | Feature: viewing comments, `select 1` to tell "not found" (404) from "empty" (200 `[]`), `JOIN` for names | ✅ |
+| 17 | Feature: editing a post, `ALTER TABLE ... ADD COLUMN`, `UPDATE ... RETURNING`, optional chaining `?.`, rethrowing errors | ✅ |

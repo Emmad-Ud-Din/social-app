@@ -336,3 +336,20 @@ h3 {
     justify-content: space-between;
     gap: 8px;
 }
+
+.post-edited {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.edit-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}

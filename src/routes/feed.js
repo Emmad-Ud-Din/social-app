@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 
     const result = await pool.query(
         `with page as (
-            select p.id, p.user_id, p.body, p.time_created
+            select p.id, p.user_id, p.body, p.time_created, p.edited_at
             from posts p
             where (p.user_id = $1
                    or p.user_id in (select case when sender_id = $1 then receiver_id else sender_id end
@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
             order by p.time_created desc, p.id desc
             limit $3
         )
-        select page.id, page.user_id as author_id, page.body, page.time_created, u.display_name,
+        select page.id, page.user_id as author_id, page.body, page.time_created, page.edited_at, u.display_name,
                (select count(*)::int from likes l where l.post_id = page.id) as likes,
                (select count(*)::int from comments c where c.post_id = page.id) as comments,
                exists (select 1 from likes l where l.post_id = page.id and l.user_id = $1) as liked_by_me

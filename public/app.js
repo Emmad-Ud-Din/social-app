@@ -157,6 +157,10 @@ function createPost(body) {
     return api('POST', '/posts', { body: body });
 }
 
+function editPost(postId, body) {
+    return api('PATCH', '/posts/' + postId, { body: body });
+}
+
 function deletePost(postId) {
     return api('DELETE', '/posts/' + postId);
 }
@@ -377,11 +381,56 @@ function renderPost(post) {
         updateLikeButton();
     });
 
-    // Delete: only shown on your own posts. The API still checks (403) either way.
+    // Edit and Delete: only shown on your own posts. The API still checks (403) either way.
     const deleteButton = li.querySelector('.delete-button');
+    const editButton = li.querySelector('.edit-button');
     if (me && post.author_id !== undefined && post.author_id !== me.userId) {
         deleteButton.remove();
+        editButton.remove();
     }
+
+    // Edit: swap the text for a box with the current text, then Save or Cancel.
+    const bodyEl = li.querySelector('.post-body');
+    const editedEl = li.querySelector('.post-edited');
+    const editForm = li.querySelector('.edit-form');
+    const editInput = editForm.elements.body;
+
+    function showEdited(editedAt) {
+        editedEl.hidden = !editedAt;
+        if (editedAt) {
+            editedEl.title = 'Edited ' + new Date(editedAt).toLocaleString();
+        }
+    }
+    showEdited(post.edited_at);
+
+    function closeEditor() {
+        editForm.hidden = true;
+        bodyEl.hidden = false;
+        editButton.disabled = false;
+    }
+
+    editButton.addEventListener('click', () => {
+        hideMessage(messageEl);
+        editInput.value = bodyEl.textContent;
+        bodyEl.hidden = true;
+        editForm.hidden = false;
+        editButton.disabled = true;
+        editInput.focus();
+    });
+    li.querySelector('.cancel-edit').addEventListener('click', closeEditor);
+    editForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        hideMessage(messageEl);
+        try {
+            const updated = await editPost(post.id, editInput.value);
+            bodyEl.textContent = updated.body;
+            showEdited(updated.edited_at);
+            closeEditor();
+        } catch (err) {
+            // e.g. 400 "post must be between 10 and 500 characters"
+            showMessage(messageEl, err.message, true);
+        }
+    });
     deleteButton.addEventListener('click', async () => {
         hideMessage(messageEl);
         if (!confirm('Delete this post?')) {
