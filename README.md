@@ -105,7 +105,8 @@ http://localhost:3000 in a browser. From there you can:
 - like and unlike, comment on, edit and delete posts (edited posts are marked
   "edited")
 - click "2 comments" under a post to read its comments, oldest first
-- see the friend requests sent to you, each with an Accept button
+- see the friend requests sent to you, each with Accept and Reject buttons
+- unfriend someone, or cancel a request you sent, from their profile
 
 The page uses exactly the same API routes as curl or the tests do, with the
 `Authorization: Bearer <token>` header, and shows the API's error messages.
@@ -147,6 +148,7 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 | GET | `/users/:id` | | 200 `{ user, friend_count, relationship, posts }`. `user` has `id`, `display_name`, `bio`, `date_created` (never the email). `relationship` is `self`, `friends`, `request_sent`, `request_received` or `none`. `posts` (newest 20) only for `self` and `friends`, otherwise `[]` | 400 invalid id, 404 user not found |
 | GET | `/friendships/pending` | | 200 `{ requests }`: requests other users sent you that are still pending, newest first. Each has `sender_id`, `display_name` and `time_sent`. Requests you sent are not included | |
 | PATCH | `/friendships/:senderId` | `{ "status": "accepted" }` | 200, the accepted request (only the receiver can accept) | 400 invalid id or status, 404 no pending request from that user |
+| DELETE | `/friendships/:userId` | | 204, no body. Removes whatever is between you and that user: unfriends them, rejects their request, or cancels yours. You can only remove rows you are part of | 400 invalid id, 404 no friendship or request with that user |
 
 ### Other
 
@@ -245,3 +247,4 @@ users ──< friendships >── users
 | 17 | Feature: editing a post, `ALTER TABLE ... ADD COLUMN`, `UPDATE ... RETURNING`, optional chaining `?.`, rethrowing errors | ✅ |
 | 18 | Feature: profile pages, privacy that depends on who is looking (allowlist), `count(*)`, `AND`/`OR` precedence, route order (`/search` before `/:id`) | ✅ |
 | 19 | Feature: editing your profile, `/me` routes, partial updates with `COALESCE`, `NULLIF` (NULL vs `''`), `??` | ✅ |
+| 20 | Feature: unfriending, rejecting and cancelling requests with one `DELETE`, a `WHERE` that only matches your own rows (no 403 needed), 204 vs 200 | ✅ |

@@ -82,4 +82,22 @@ router.get('/pending', async (req, res) => {
     res.json({ requests: result.rows });
 });
 
+router.delete('/:userId', async(req,res)=>{
+    const otherId=Number(req.params.userId);
+    if(!Number.isInteger(otherId)||otherId<1){
+        return res.status(400).json({error:'user id must be a number'});
+    }
+
+    const result = await pool.query(`
+        delete from friendships
+        where(sender_id=$1 and receiver_id=$2) or
+        (sender_id=$2 and receiver_id=$1)`,
+    [req.userId, otherId]);
+
+    if (result.rowCount===0){
+        return res.status(404).json({error:'no friendship or request with that user'});
+    }
+    res.status(204).end();
+})
+
 module.exports=router;

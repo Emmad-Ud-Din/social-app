@@ -201,6 +201,11 @@ function updateMyProfile(fields) {
     return api('PATCH', '/users/me', fields);
 }
 
+// Unfriend, reject a request, or cancel your own request: all the same call.
+function removeFriendship(userId) {
+    return api('DELETE', '/friendships/' + userId);
+}
+
 function getPendingRequests() {
     return api('GET', '/friendships/pending');
 }
@@ -282,7 +287,23 @@ async function loadPendingRequests() {
         button.type = 'button';
         button.textContent = 'Accept';
         button.addEventListener('click', () => acceptAndRefresh(request.sender_id));
-        item.append(who, button);
+        const reject = document.createElement('button');
+        reject.type = 'button';
+        reject.className = 'secondary';
+        reject.textContent = 'Reject';
+        reject.addEventListener('click', async () => {
+            try {
+                await removeFriendship(request.sender_id);
+                pageMessage('Request from ' + request.display_name + ' rejected.', false);
+                loadPendingRequests();
+            } catch (err) {
+                pageMessage(err.message, true);
+            }
+        });
+        const buttons = document.createElement('span');
+        buttons.className = 'button-pair';
+        buttons.append(button, reject);
+        item.append(who, buttons);
         list.append(item);
     }
 }
@@ -750,6 +771,35 @@ function renderProfile(data) {
     }
     $('profile-edit-form').hidden = true;
     action.append(button);
+
+    // A second button that removes the row between you: Unfriend, Reject or Cancel.
+    const removeLabels = {
+        friends: 'Unfriend',
+        request_received: 'Reject',
+        request_sent: 'Cancel request',
+    };
+    const removeLabel = removeLabels[data.relationship];
+    if (removeLabel) {
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = data.relationship === 'friends' ? 'danger' : 'secondary';
+        remove.textContent = removeLabel;
+        remove.addEventListener('click', async () => {
+            if (data.relationship === 'friends' &&
+                !confirm('Remove ' + user.display_name + ' from your friends?')) {
+                return;
+            }
+            try {
+                await removeFriendship(user.id);
+                openProfile(user.id);
+                loadPendingRequests();
+                loadFeed(true);  // an ex-friend's posts leave your feed
+            } catch (err) {
+                pageMessage(err.message, true);
+            }
+        });
+        action.append(remove);
+    }
 
     // Posts: only you and your friends get them; everyone else gets [].
     const list = $('profile-posts');
