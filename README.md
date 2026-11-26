@@ -37,6 +37,8 @@ tests/
   comments.test.js         viewing comments: order, empty list, 404/400/401
   edit.test.js             editing a post: owner only, body rules, author can't change
   profile.test.js          profiles: who sees posts, friend count, no email, route order
+  me.test.js               editing your profile: partial updates, empty bio, validation
+  unfriend.test.js         unfriend, reject, cancel; only your own friendships
 .github/workflows/test.yml  runs npm test on GitHub for every push
 .env.example     template for .env (never commit .env)
 .env.test.example template for .env.test, used by npm test
