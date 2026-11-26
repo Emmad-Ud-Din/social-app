@@ -177,7 +177,8 @@ curl.exe -i http://localhost:3000/feed -H "Authorization: Bearer $token"
 ```
 
 On macOS or Linux use `curl` and `TOKEN=$(...)`. The sample users in
-`db/seed.sql` have placeholder password hashes and cannot log in; create your
+`db/seed.sql` (`ann@mail.com`, `ben@mail.com`, `cara@mail.com`, `dev@mail.com`,
+`eve@mail.com`) all log in with the demo password `password123`; or create your
 own with `/signup`.
 
 ## Tables

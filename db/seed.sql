@@ -1,12 +1,14 @@
 -- Sample data for practising queries. Run after schema.sql.
 -- Times are relative to now() so "newest first" is predictable.
 
+-- Every sample user's password is password123. The value stored is its bcrypt
+-- hash (made with bcryptjs, cost 10), never the password itself.
 INSERT INTO users (email, display_name, password_hash, bio) VALUES
-  ('ann@mail.com',  'Ann',  'hash', 'Coffee and climbing'),   -- 1
-  ('ben@mail.com',  'Ben',  'hash', NULL),                    -- 2
-  ('cara@mail.com', 'Cara', 'hash', 'Photographer'),          -- 3
-  ('dev@mail.com',  'Dev',  'hash', NULL),                    -- 4
-  ('eve@mail.com',  'Eve',  'hash', 'Just joined');           -- 5
+  ('ann@mail.com',  'Ann',  '$2b$10$A27iaV9ZNzxhrGKWcO5X3egJ8687QsOfLSyFWXeIg32.nPkMOR6iG', 'Coffee and climbing'),   -- 1
+  ('ben@mail.com',  'Ben',  '$2b$10$A27iaV9ZNzxhrGKWcO5X3egJ8687QsOfLSyFWXeIg32.nPkMOR6iG', NULL),                    -- 2
+  ('cara@mail.com', 'Cara', '$2b$10$A27iaV9ZNzxhrGKWcO5X3egJ8687QsOfLSyFWXeIg32.nPkMOR6iG', 'Photographer'),          -- 3
+  ('dev@mail.com',  'Dev',  '$2b$10$A27iaV9ZNzxhrGKWcO5X3egJ8687QsOfLSyFWXeIg32.nPkMOR6iG', NULL),                    -- 4
+  ('eve@mail.com',  'Eve',  '$2b$10$A27iaV9ZNzxhrGKWcO5X3egJ8687QsOfLSyFWXeIg32.nPkMOR6iG', 'Just joined');           -- 5
 
 INSERT INTO friendships (sender_id, receiver_id, status) VALUES
   (1, 2, 'accepted'),   -- Ann & Ben are friends
