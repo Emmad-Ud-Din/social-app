@@ -87,6 +87,18 @@
                 <p id="profile-bio" class="profile-bio"></p>
                 <p id="profile-meta" class="hint"></p>
                 <div id="profile-action"></div>
+                <form id="profile-edit-form" hidden>
+                    <label>Name
+                        <input type="text" name="display_name" maxlength="50" required>
+                    </label>
+                    <label>Bio <span class="hint">(leave empty for no bio)</span>
+                        <textarea name="bio" rows="2" maxlength="160"></textarea>
+                    </label>
+                    <div class="edit-actions">
+                        <button type="submit">Save</button>
+                        <button type="button" id="profile-edit-cancel" class="secondary">Cancel</button>
+                    </div>
+                </form>
             </div>
             <h2>Posts</h2>
             <p id="profile-posts-note" class="hint" hidden></p>

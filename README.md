@@ -21,7 +21,7 @@ src/
   routes/posts.js          /posts, /posts/:id, likes, comments
   routes/feed.js           /feed
   routes/friendships.js    /friendships
-  routes/users.js          /users/search, /users/:id (profiles)
+  routes/users.js          /users/search, /users/me (edit profile), /users/:id (profiles)
 public/
   index.html               the web front end's page
   style.css                its styles
@@ -99,6 +99,7 @@ http://localhost:3000 in a browser. From there you can:
 - search for people by name and send them a friend request
 - click any name, or "My profile", to open a profile: name, bio, friend count,
   the right button (Add friend, Accept, Friends) and, for friends only, posts
+- edit your own name and bio from your profile ("Edit profile")
 - write posts (with a 10–500 character counter)
 - read your feed 10 posts at a time, with a "Load more" button
 - like and unlike, comment on, edit and delete posts (edited posts are marked
@@ -142,6 +143,7 @@ These need the header `Authorization: Bearer <token>`. Without it they return
 | POST | `/posts/:id/comments` | `{ "body" }` | 201, the new comment | 400 invalid post id or body length, 404 post not found |
 | POST | `/friendships` | `{ "receiver_id" }` | 201, a `pending` request from you | 400 to yourself, missing or invalid id; 404 user not found; 409 request already exists (either direction) |
 | GET | `/users/search?q=` | | 200 `{ users }`: up to 20 users whose `display_name` contains `q` (any case), sorted by name, never including you. Each has only `id` and `display_name` | 400 `q` missing, blank or over 50 characters |
+| PATCH | `/users/me` | `{ "display_name", "bio" }` (either or both) | 200, your updated profile. Only the fields you send change; send `"bio": ""` to remove your bio | 400 nothing to update, name not 1–50 characters, bio over 160 characters |
 | GET | `/users/:id` | | 200 `{ user, friend_count, relationship, posts }`. `user` has `id`, `display_name`, `bio`, `date_created` (never the email). `relationship` is `self`, `friends`, `request_sent`, `request_received` or `none`. `posts` (newest 20) only for `self` and `friends`, otherwise `[]` | 400 invalid id, 404 user not found |
 | GET | `/friendships/pending` | | 200 `{ requests }`: requests other users sent you that are still pending, newest first. Each has `sender_id`, `display_name` and `time_sent`. Requests you sent are not included | |
 | PATCH | `/friendships/:senderId` | `{ "status": "accepted" }` | 200, the accepted request (only the receiver can accept) | 400 invalid id or status, 404 no pending request from that user |
@@ -242,3 +244,4 @@ users ──< friendships >── users
 | 16 | Feature: viewing comments, `select 1` to tell "not found" (404) from "empty" (200 `[]`), `JOIN` for names | ✅ |
 | 17 | Feature: editing a post, `ALTER TABLE ... ADD COLUMN`, `UPDATE ... RETURNING`, optional chaining `?.`, rethrowing errors | ✅ |
 | 18 | Feature: profile pages, privacy that depends on who is looking (allowlist), `count(*)`, `AND`/`OR` precedence, route order (`/search` before `/:id`) | ✅ |
+| 19 | Feature: editing your profile, `/me` routes, partial updates with `COALESCE`, `NULLIF` (NULL vs `''`), `??` | ✅ |

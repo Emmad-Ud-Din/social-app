@@ -387,3 +387,19 @@ h3 {
 #profile-action {
     margin-top: 10px;
 }
+
+#profile-edit-form {
+    margin-top: 12px;
+}
+
+#profile-edit-form label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+#profile-edit-form input,
+#profile-edit-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 4px;
+}

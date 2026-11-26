@@ -197,6 +197,10 @@ function getProfile(userId) {
     return api('GET', '/users/' + userId);
 }
 
+function updateMyProfile(fields) {
+    return api('PATCH', '/users/me', fields);
+}
+
 function getPendingRequests() {
     return api('GET', '/friendships/pending');
 }
@@ -731,9 +735,21 @@ function renderProfile(data) {
         button.className = 'secondary';
         button.disabled = true;
     }
-    if (data.relationship !== 'self') {
-        action.append(button);
+    if (data.relationship === 'self') {
+        // Your own profile: an Edit profile button that opens the form.
+        button.textContent = 'Edit profile';
+        button.className = 'secondary';
+        button.addEventListener('click', () => {
+            const form = $('profile-edit-form');
+            form.elements.display_name.value = user.display_name;
+            form.elements.bio.value = user.bio || '';
+            form.hidden = false;
+            button.hidden = true;
+            form.elements.display_name.focus();
+        });
     }
+    $('profile-edit-form').hidden = true;
+    action.append(button);
 
     // Posts: only you and your friends get them; everyone else gets [].
     const list = $('profile-posts');
@@ -760,6 +776,28 @@ function renderProfile(data) {
 }
 
 $('profile-back').addEventListener('click', closeProfile);
+$('profile-edit-cancel').addEventListener('click', () => {
+    $('profile-edit-form').hidden = true;
+    const button = $('profile-action').querySelector('button');
+    if (button) {
+        button.hidden = false;
+    }
+});
+$('profile-edit-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.target;
+    try {
+        const updated = await updateMyProfile({
+            display_name: form.elements.display_name.value,
+            bio: form.elements.bio.value,   // "" clears the bio
+        });
+        pageMessage('Profile saved.', false);
+        openProfile(updated.id);
+        loadFeed(true);  // your posts show your new name
+    } catch (err) {
+        pageMessage(err.message, true);
+    }
+});
 $('my-profile-button').addEventListener('click', () => {
     const me = readTokenPayload(getToken());
     if (me) {

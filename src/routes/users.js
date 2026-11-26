@@ -31,6 +31,38 @@ router.get('/search', async (req, res) => {
     res.json({ users: result.rows });
 });
 
+router.patch('/me', async(req,res)=>{
+    let name = req.body?.display_name;
+    let bio = req.body?.bio;
+
+    if(name===undefined && bio===undefined){
+        return res.status(400).json({error:'nothing to update'});
+    }
+
+    if(name!==undefined){
+        if(typeof name !=='string' || name.trim().length<1||name.trim().length>50){
+            return res.status(400).json({error:'display_name must be 1 to 50 characters'});
+        }
+        name = name.trim();
+    }
+    if(bio !== undefined){
+        if(typeof bio !== 'string'||bio.trim().length>160){
+            return res.status(400).json({error:'bio must be at most 160 characters'});
+        }
+        bio=bio.trim();
+    }
+
+    const result = await pool.query(`
+        update users
+        set display_name=coalesce($1, display_name),
+        bio = nullif(coalesce($2,bio),'')
+        where id=$3
+        returning id, display_name, bio, date_created`,
+    [name??null, bio??null, req.userId]
+    );
+    res.json(result.rows[0]);
+});
+
 router.get('/:id', async (req, res) => {
     const userId = Number(req.params.id);
     if (!Number.isInteger(userId) || userId < 1) {
